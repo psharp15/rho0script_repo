@@ -16,17 +16,17 @@ double mrho0=0.77549;
 
 double sq( double x ){return x*x ;};
 
-void pp2p_throwntrees(const char* infilename, const char* histname);
+void pp2p_gcf(const char* infilename, const char* histname);
 //void pp2p_throwntrees(const char* infilename, const char* histname, const char* outfilename)
 //void ppvsp_rho0(string infilename, string outfilename)
-    //cerr << "Hello world\n";
+    cerr << "Hello world\n";
 		// Open input files and trees
 		TFile *f = new TFile(infilename);
 		//TFile *f = new TFile(infilename.c_str());
 		TTree *inputtree = (TTree *)f->Get("genT");
 
-		//TFile *outputfile = new TFile(histname,"RECREATE");
-		TFile *outputfile = new TFile(infilename"_analyzed.root","RECREATE");
+		TFile *outputfile = new TFile(histname,"RECREATE");
+		//TFile *outputfile = new TFile(infilename"_analyzed.root","RECREATE");
 
         double Ephoton, pMeson[3], pBaryon[3],pRec[3], weight;
         int mesonPID, baryonPID, recPID;
