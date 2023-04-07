@@ -16,7 +16,7 @@ double mrho0=0.77549;
 
 double sq( double x ){return x*x ;};
 
-void pp2p_throwntrees(const char* infilename, const char* histname)
+void pp2p_throwntrees(const char* infilename, const char* histname);
 //void pp2p_throwntrees(const char* infilename, const char* histname, const char* outfilename)
 //void ppvsp_rho0(string infilename, string outfilename)
     //cerr << "Hello world\n";
@@ -25,8 +25,8 @@ void pp2p_throwntrees(const char* infilename, const char* histname)
 		//TFile *f = new TFile(infilename.c_str());
 		TTree *inputtree = (TTree *)f->Get("genT");
 
-		TFile *outputfile = new TFile(histname,"RECREATE");
-		//TFile *outputfile = new TFile(infilename"_analyzed.root","RECREATE");
+		//TFile *outputfile = new TFile(histname,"RECREATE");
+		TFile *outputfile = new TFile(infilename"_analyzed.root","RECREATE");
 
         double Ephoton, pMeson[3], pBaryon[3],pRec[3], weight;
         int mesonPID, baryonPID, recPID;
@@ -41,7 +41,7 @@ void pp2p_throwntrees(const char* infilename, const char* histname)
 		//histograms
 		TH1D *h_pmiss_pp = new TH1D("h_pmiss_pp","Pmiss of pp pairs with various models; pmiss; Cross section [nb]", 100,0., 1.0);
         TH1D *h_pmiss_p = new TH1D("h_pmiss_p","Pmiss of p pairs with various models; pmiss; Cross section [nb]", 100,0., 1.0);
-        TH1D *h_v3pmiss_uncut = new TH1D("h_v3pmiss_uncut","Pmiss; pmiss; Cross section [nb]", 100,0., 1.0);
+        TH1D *h_p3_pmiss_uncut = new TH1D("h_v3pmiss_uncut","Pmiss; pmiss; Cross section [nb]", 100,0., 1.0);
         TH1D *h_t = new TH1D("h_t","t; t; counts", 100,0.,10);
 		TH1D *h_u = new TH1D("h_u","u; u; counts", 100,0., 100);
         TH1D *h_t_cut = new TH1D("h_t_cut","t_cut; t; counts", 100,0.,10);
@@ -136,7 +136,7 @@ void pp2p_throwntrees(const char* infilename, const char* histname)
 		outputfile->cd();
         h_pmiss_pp->Write();
 		h_pmiss_p->Write();
-        h_v3pmiss_uncut->Write();
+        h_p3_pmiss_uncut->Write();
         h_t->Write();
         h_u->Write();
         h_t_cut->Write();
