@@ -16,24 +16,25 @@ double mrho0=0.77549;
 
 double sq( double x ){return x*x ;};
 
-void pp2p_gcf(const char* infilename, const char* histname);
-//void pp2p_throwntrees(const char* infilename, const char* histname, const char* outfilename)
-//void ppvsp_rho0(string infilename, string outfilename)
+void pp2p_gcf(const char* infilename, const char* histname){
+
     cerr << "Hello world\n";
+
 		// Open input files and trees
 		TFile *f = new TFile(infilename);
-		//TFile *f = new TFile(infilename.c_str());
 		TTree *inputtree = (TTree *)f->Get("genT");
 
 		TFile *outputfile = new TFile(histname,"RECREATE");
 		//TFile *outputfile = new TFile(infilename"_analyzed.root","RECREATE");
 
-        double Ephoton, pMeson[3], pBaryon[3],pRec[3], weight;
-        int mesonPID, baryonPID, recPID;
+        double Ephoton, pMeson[3], pBaryon[3],pRec[3], mMeson, mBaryon, weight;
+        int mesonPID, baryonPID, PID_recoil;
     
 		inputtree->SetBranchAddress("Ephoton",&Ephoton);
     	inputtree->SetBranchAddress("pMeson",&pMeson);
+        inputtree->SetBranchAddress("mMeson",&mMeson);
         inputtree->SetBranchAddress("pBaryon",&pBaryon);
+        inputtree->SetBranchAddress("mBaryon",&mBaryon);
         inputtree->SetBranchAddress("pRec",&pRec);
 		inputtree->SetBranchAddress("weight",&weight);
         inputtree->SetBranchAddress("recPID",&PID_recoil);
@@ -82,7 +83,7 @@ void pp2p_gcf(const char* infilename, const char* histname);
             //kinematic cuts (Lead)
 			TVector3 BeamMinusBaryon = p4_beam_gen.Vect() - p4_prot_gen.Vect();
 			double u = sq(BeamMinusBaryon.Mag());
-			TLorentzVector BeamMinusMeson = pr_beam_gen.Vect() - p4_rho0_gen.Vect();
+			TVector3 BeamMinusMeson = p4_beam_gen.Vect() - p4_rho0_gen.Vect();
 			double t = sq(BeamMinusMeson.Mag());
             
             h_t->Fill(t);
