@@ -9,13 +9,13 @@ void DS_2p::Init(TTree *locTree)
     /******************* SIMULATION FLATTREES *********************/
     //dFlatTreeFileName = "flattree_gc12__protprot_AV18_inc_0bg.root"; //output flat tree (one combo per tree entry), "" for none
     //dFlatTreeFileName = "flattree_gc12__protprot_AV4_inc_0bg.root";
-    dFlatTreeFileName = "flattree_gc12__protprot_N2LO_inc_0bg.root";
+    //dFlatTreeFileName = "flattree_gc12__protprot_N2LO_inc_0bg.root";
     
     /******************* DATA FLATTREES *********************/
     // dFlatTreeFileName = "flattree_C12_2p_data_inc.root";
     
-    
-    dFlatTreeName = ""; //if blank, default name will be chosen
+    	dFlatTreeFileName = "output.root";
+        dFlatTreeName = ""; //if blank, default name will be chosen
 	dSaveDefaultFlatBranches = true; // False: don't save default branches, reduce disk footprint.
 	
     //INITIALIZE THE TREE INTERFACE AND WRAPPERS

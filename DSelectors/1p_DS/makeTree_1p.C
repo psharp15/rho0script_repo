@@ -11,10 +11,10 @@ void makeTree_1p()
  	chain->Process("./DS_1p.C++","flattree_gd__prot_AV18_missn_0bg.root"); 
 */
 // 	missing unknown
-/* 	TChain *chain = new TChain("gd_pippimprotinc__F4_B4_T2_S4_Tree");
- 	chain->Add("/volatile/halld/home/psharp/simulation/halld_sim_swif/AV18_D2/0bg/root/trees/tree_gd_pippimprotinc__F4_B4_T2_S4_gen_gcf_090207_*.root");
-  //  	chain->Process("./DS_1p.C++","flattree_gd__prot_AV18_inc_0bg.root"); 
-*/
+ 	TChain *chain = new TChain("gd_pippimprotinc__F4_B4_T2_S4_Tree");
+ 	chain->Add("/volatile/halld/home/psharp/simulation/halld_sim_swif/AV18_D2/0bg/root/trees/tree_gd_pippimprotinc__F4_B4_T2_S4_gen_gcf_090207_499.root");
+    	chain->Process("./DS_1p.C++","flattree_gd__prot_AV18_inc_0bg.root"); 
+
 
 ///Helium (AV18)
 //	missing neutron
@@ -64,11 +64,11 @@ void makeTree_1p()
  */
 
     //	missing unknown
-  TChain *chain = new TChain("gc12_pippimprotinc__F4_B4_Tree");
+/*  TChain *chain = new TChain("gc12_pippimprotinc__F4_B4_Tree");
     chain->Add("/volatile/halld/home/psharp/simulation/halld_sim_swif/N2LO_C12/0bg/root/trees/tree_gc12_pippimprotinc__F4_B4_gen_gcf_090306_*.root");
 //    chain->Process("./DS_1p.C++","flattree_gc12__prot_N2LO_inc_0bg.root"); 
  
-
+*/
 
 /*	DPROOFLiteManager *dproof = new DPROOFLiteManager();
   	dproof->Process_Chain(chain, "./DS_1p.C++", NThreads, "hist_helium.root", "test_helium.root"); // multi-threaded using dproof -> faster
@@ -80,8 +80,8 @@ void makeTree_1p()
         chain->Process("./DS_1p.C++","flattree_gd__prot_AV18_inc_0bg.root");  
 */
 
-        DPROOFLiteManager *dproof = new DPROOFLiteManager();
+/*        DPROOFLiteManager *dproof = new DPROOFLiteManager();
         dproof->Process_Chain(chain, "./DS_1p.C++", NThreads, "hist_carbon_N2LO.root", "test_carbon_N2LO.root"); // multi-threaded using dproof -> faster
         chain->Process("./DS_1p.C++","flattree_gc12__prot_N2LO_inc_0bg.root");
- 
+ */
 }

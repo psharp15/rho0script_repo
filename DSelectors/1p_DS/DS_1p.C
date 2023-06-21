@@ -11,7 +11,7 @@ void DS_1p::Init(TTree *locTree)
 	//dFlatTreeFileName = "flattree_gd__prot_AV18_inc_0bg.root";
     	//dFlatTreeFileName = "flattree_ghe__prot_AV18_inc_0bg.root";
     	//dFlatTreeFileName = "flattree_gc12__prot_AV18_inc_0bg.root";
-	dFlatTreeFileName = "flattree_gc12__prot_N2LO_inc_0bg_1t.root";	
+	//dFlatTreeFileName = "flattree_gc12__prot_N2LO_inc_0bg_1t.root";	
 	//dFlatTreeFileName = "flattree_gc12__prot_AV4_inc_0bg.root";
     
 /****** DATA Flattrees ***********/
@@ -20,6 +20,7 @@ void DS_1p::Init(TTree *locTree)
     //dFlatTreeFileName = "flattree_He4_1p_data_inc.root";
     //dFlatTreeFileName = "flattree_C12_1p_data_inc.root";
 	
+    dFlatTreeFileName = "output.root";
 	dFlatTreeName = ""; //if blank, default name will be chosen
 	dSaveDefaultFlatBranches = true; // False: don't save default branches, reduce disk footprint.
  
@@ -268,6 +269,8 @@ Bool_t DS_1p::Process(Long64_t locEntry)
 		locUsedThisCombo_MissingMass[PiPlus].insert(locPiPlusTrackID);
 		locUsedThisCombo_MissingMass[PiMinus].insert(locPiMinusTrackID);
 		locUsedThisCombo_MissingMass[Proton].insert(locProtonTrackID);
+
+	   	 //dHist_MissingEnergy->Fill(locMissingEnergy,locHistAccidWeightFactor);
 
 		//compare to what's been used so far
 		if(locUsedSoFar_MissingMass.find(locUsedThisCombo_MissingMass) == locUsedSoFar_MissingMass.end())
