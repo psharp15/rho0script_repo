@@ -37,7 +37,7 @@ void pp2p_gcf(const char* infilename, const char* histname){
         inputtree->SetBranchAddress("mBaryon",&mBaryon);
         inputtree->SetBranchAddress("pRec",&pRec);
 		inputtree->SetBranchAddress("weight",&weight);
-        inputtree->SetBranchAddress("recPID",&PID_recoil);
+        inputtree->SetBranchAddress("rec_type",&PID_recoil);
     
 		//histograms
 		TH1D *h_pmiss_pp = new TH1D("h_pmiss_pp","Pmiss of pp pairs with various models; pmiss; Cross section [nb]", 100,0., 1.0);

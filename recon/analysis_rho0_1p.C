@@ -7,7 +7,7 @@ TLorentzVector p4_d2 = 2.0136 * p4_u;
 TLorentzVector p4_he4 = 4.003 * p4_u;
 TLorentzVector p4_c12 = 12. * p4_u;
 
-void analysis_rho0_1p(const char *inputfilename, const char *outfilename)
+void analysis_rho0_1p(const char *inputfilename, const char *inputTreename, const char *outfilename)
 {
   cerr << "Hello world\n";
 
@@ -16,7 +16,7 @@ void analysis_rho0_1p(const char *inputfilename, const char *outfilename)
   //TTree *inputTree = (TTree*) inputFile-> Get("gd_pippimprotmissn__F4_B4_T2_S4");
   //TTree *inputTree = (TTree*) inputFile-> Get("gd_pippimprotinc__F4_B4_T2_S4");
   //TTree *inputTree = (TTree*) inputFile-> Get("ghe_pippimprotinc__F4_B4_T2_S4");
-  TTree *inputTree = (TTree*) inputFile-> Get("gc12_pippimprotinc__F4_B4");
+  TTree *inputTree = (TTree*) inputFile-> Get(inputTreename);
 
   TFile *fout=new TFile(outfilename,"RECREATE");
 
