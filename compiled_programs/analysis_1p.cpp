@@ -5,8 +5,9 @@
 using namespace std ;
 
 int main(int argc, char** argv){
-	if (argc!=3){
-	cerr << "You must add some inputs here!";
+	if (argc < 3)
+	{
+	cout << "You must add some inputs here!";
 	return -1;
 	}
 	TFile *infile= new TFile(argv[1]);
