@@ -13,8 +13,8 @@ from subprocess import Popen, PIPE
 
 for i in range(10):
 	job_name = 'gcf_pp2p_%s_%s_%i' % (potential,target,i)
-	out_file = '/work/halld2/home/psharp/analysis/simulation/gcf_sim/8GeV/%s_%s/pp2p_out_%s_%s_%i.txt' % (potential,target,potential,target,i)
-	err_file = '/work/halld2/home/psharp/analysis/simulation/gcf_sim/8GeV/%s_%s/pp2p_err_%s_%s_%i.txt' % (potential,target,potential,target,i)
+	out_file = '/work/halld2/home/psharp/simulation/output/gcf_raw/8GeV/%s_%s/pp2p_out_%s_%s_%i.txt' % (potential,target,potential,target,i)
+	err_file = '/work/halld2/home/psharp/simulation/output/gcf_raw/8GeV/%s_%s/pp2p_err_%s_%s_%i.txt' % (potential,target,potential,target,i)
 	print ('Working on submitting run '+str(i))
 	command="""#!/bin/sh
 #SBATCH --job-name=%s
@@ -27,7 +27,7 @@ for i in range(10):
 #SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-sh /w/halld-scshelf2101/halld2/home/psharp/analysis/rho0script_repo/gcf/run_pp2p_gcf.sh %s %s %i""" % (job_name,out_file,err_file,potential,target,i)
+sh /w/halld-scshelf2101/halld2/home/psharp/rho0script_repo/gcf/run_pp2p_gcf.sh %s %s %i""" % (job_name,out_file,err_file,potential,target,i)
 	print(command)        
 	p=Popen(args=["sbatch"],stdin=PIPE);
 	p.communicate(command.encode())

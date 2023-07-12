@@ -68,7 +68,7 @@ echo "Inputs are valid"
 
 program=/w/halld-scshelf2101/halld2/home/psharp/simulation/GCF_Generator_Suite/build/src/programs/genPhoto/genPhoto
 
-outdir=/volatile/halld/home/psharp/simulation/8GeV_gcf_raw/${potential}_${target}
+outdir=/volatile/halld/home/psharp/simulation/gcf_raw/8GeV/${potential}_${target}
 outfile=${outdir}/genoutput_${run}.root
 
 $program $Z $N $outfile 100000000 -R rho0 -u $potential -B 8

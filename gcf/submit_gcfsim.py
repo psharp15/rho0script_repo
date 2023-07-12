@@ -14,8 +14,8 @@ from subprocess import Popen, PIPE
 
 for i in range(10):
     job_name = 'gcf_sim_%s_%s_%i' % (potential,target,i)
-    out_file = '/volatile/halld/home/psharp/simulation/gcf_sim_slurm/8GeV/%s_%s/gcf_sim_out_%s_%s_%i.txt' % (potential,target,potential,target,i)
-    err_file = '/volatile/halld/home/psharp/simulation/gcf_sim_slurm/8GeV/%s_%s/gcf_sim_err_%s_%s_%i.txt' % (potential,target,potential,target,i)
+    out_file = '/volatile/halld/home/psharp/simulation/gcf_raw/8GeV/%s_%s/gcf_sim_out_%s_%s_%i.txt' % (potential,target,potential,target,i)
+    err_file = '/volatile/halld/home/psharp/simulation/gcf_raw/8GeV/%s_%s/gcf_sim_err_%s_%s_%i.txt' % (potential,target,potential,target,i)
     print ('Working on submitting run '+str(i))
     command="""#!/bin/sh
 #SBATCH --job-name=%s
@@ -28,7 +28,7 @@ for i in range(10):
 #SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-sh /w/halld-scshelf2101/halld2/home/psharp/analysis/simulation/gcf_sim/runscripts/run_gcf.bash %s %s %i""" % (job_name,out_file,err_file,potential,target,i)
+sh ~/work/rho0script_repo/gcf/run_gcf.sh %s %s %i""" % (job_name,out_file,err_file,potential,target,i)
     print(command)
     p=Popen(args=["sbatch"],stdin=PIPE);
     p.communicate(command.encode())
