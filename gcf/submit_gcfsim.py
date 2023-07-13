@@ -28,7 +28,7 @@ for i in range(10):
 #SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-sh ~/work/rho0script_repo/gcf/run_gcf.sh %s %s %i""" % (job_name,out_file,err_file,potential,target,i)
+sh /work/halld2/home/psharp/rho0script_repo/gcf/run_gcf.sh %s %s %i""" % (job_name,out_file,err_file,potential,target,i)
     print(command)
     p=Popen(args=["sbatch"],stdin=PIPE);
     p.communicate(command.encode())
