@@ -100,18 +100,20 @@ if (!inputTree)
   outputTree->Branch("pip_p4_kin",&p4_pip_kin);
   outputTree->Branch("pim_p4_kin",&p4_pim_kin);
   outputTree->Branch("beam_p4_kin",&p4_beam_kin);
-  ouputTree->SetBranchAddress("accidweight",&weight);
-inputTree->SetBranchAddress("event",&event);
+  outputTree->Branch("accidweight",&weight);
+  outputTree->Branch("event",&event);
 
-outputTree->SetBranchAddress("thrownBeam",&p4_beam_thrown);
-  outputTree->SetBranchAddress("thrownPiPlus",&p4_pip_thrown);
-  outputTree->SetBranchAddress("thrownPiMinus",&p4_pim_thrown);
-  outputTree->SetBranchAddress("thrownProton1",&p4_prot1_thrown);
-  outputTree->SetBranchAddress("thrownProton2",&p4_prot2_thrown);
-outputTree->SetBranchAddress("thrownProton1",&p4_prot1_thrown);
-  outputTree->BranchAddress("thrownProton2",&p4_prot2_thrown);
+  outputTree->Branch("thrownBeam",&p4_beam_thrown);
+  outputTree->Branch("thrownPiPlus",&p4_pip_thrown);
+  outputTree->Branch("thrownPiMinus",&p4_pim_thrown);
+  outputTree->Branch("thrownProton1",&p4_prot1_thrown);
+  outputTree->Branch("thrownProton2",&p4_prot2_thrown);
+  outputTree->Branch("p4_prot_lead_thrown",&p4_prot_lead_thrown);
+  outputTree->Branch("p4_prot_recoil_thrown",&p4_prot_recoil_thrown);
+
+
 /********************************************** Defining Histograms **********************************************/
- 
+
   vector<TH1 *> hist_list;
   TDirectory * dir_UnCut = fout->mkdir("UnCut");
   TDirectory * dir_TCut = fout->mkdir("TCut");
@@ -158,7 +160,7 @@ outputTree->SetBranchAddress("thrownProton1",&p4_prot1_thrown);
   TH2D *h_prot_p_theta_uncut = new TH2D ("prot_p_theta_uncut","Prot_PVSTheta ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
     hist_list.push_back(h_prot_p_theta_uncut);
   TH2D *h_prot_p_theta_tcut_misid = new TH2D ("prot_p_theta_tcut_misid","Prot_PVSTheta_tcut_misid ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
-    hist_list.push_back(h_prot_p_theta_tcut_misid); 
+    hist_list.push_back(h_prot_p_theta_tcut_misid);
   TH1D *h_prot_from_Beam_uncut = new TH1D("prot_from_Beam_uncut","prot_from_Beam; Angle [Degrees];Counts",300,0,180);
     hist_list.push_back(h_prot_from_Beam_uncut);
   TH2D *h_prot_p_theta_THROWN_uncut = new TH2D ("prot_p_theta_THROWN_uncut","Prot_PVSTheta ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
@@ -198,7 +200,7 @@ outputTree->SetBranchAddress("thrownProton1",&p4_prot1_thrown);
     hist_list.push_back(h_pmiss_Mag_Angle_uncut);
   TH2D *h_pmiss_Mag_Angle_tcut_misid = new TH2D ("pmiss_Mag_Angle_tcut_misid","pmiss_Mag_Angle_tcut_misid;pmiss angle;pmiss mag", 200, -1,1, 200, 0,3);
     hist_list.push_back(h_pmiss_Mag_Angle_tcut_misid);
-  
+
   TH1D *h_pmiss_uncut = new TH1D("pmiss_uncut", "Missing Momentum [GeV];Counts",200,0.,2.);
     hist_list.push_back(h_pmiss_uncut);
   TH1D *h_pmiss_tcut = new TH1D("pmiss_tcut", "Missing Momentum [GeV];pmiss[GeV];Counts",200,0.,2.);
@@ -245,7 +247,7 @@ outputTree->SetBranchAddress("thrownProton1",&p4_prot1_thrown);
     hist_list.push_back(h_pminus_pmiss_uncut);
   TH1D *h_pminus_pmiss_tcut_misid = new TH1D("pminus_Pmiss_tcut_misid","pminus_pmiss;pminus",50,0,2);
     hist_list.push_back(h_pminus_pmiss_tcut_misid);
-  
+
   /****** Energy Balance ******/
   TH1D *h_energy_balance = new TH1D ("energy_balance","Energy Balance; Mass of Target ;counts",50,0,30);
     hist_list.push_back(h_energy_balance);
@@ -270,7 +272,9 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
 
 /********************************************** Sorting Protons **********************************************/
 
-  if (p4_prot1_kin->P() > 1.2 && p4_prot2_kin->P() < 1)
+const double pleadcutoff = 1;
+
+  if (p4_prot1_kin->P() > pleadcutoff && p4_prot2_kin->P() < pleadcutoff)
   {
     p4_prot_lead_kin = p4_prot1_kin;
     p4_prot_recoil_kin = p4_prot2_kin;
@@ -279,7 +283,7 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
     p4_prot_recoil_thrown = p4_prot2_thrown;
   }
 
-  else if (p4_prot1_kin->P() < 1 && p4_prot2_kin->P() > 1.2)
+  else if (p4_prot1_kin->P() < pleadcutoff && p4_prot2_kin->P() > pleadcutoff)
   {
     p4_prot_lead_kin = p4_prot2_kin;
     p4_prot_recoil_kin = p4_prot1_kin;
@@ -291,7 +295,7 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
   else
     continue;
 
-  if (p4_prot_recoil_kin->P() < 0.4)
+  if (p4_prot_recoil_kin->P() < 0.3)
     continue;
 
 
@@ -323,7 +327,7 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
   h_CL_cut->Fill(TMath::Prob(kin_chisq,kin_ndf),weight);
   h_zprot1vertex->Fill(x4_prot1_meas->Z(),weight);
   h_zprot2vertex->Fill(x4_prot2_meas->Z(),weight);
-  
+
   h_pmiss_uncut->Fill((p3_pmiss).Mag(),weight);
   h_pmiss_THROWN_uncut -> Fill(p3_pmiss_thrown.Mag(),weight);
   h_rho0counts_uncut->Fill(p4_rho0_kin.M());
@@ -363,10 +367,10 @@ h_rho0counts_THROWN_tcut->Fill(p4_rho0_thrown.M());
 h_pmiss_vs_rho0counts_tcut -> Fill((p4_rho0_kin).M(),p3_pmiss.Mag(),weight);
 
 /********************************************** Missed PID - Cut **********************************************/
-if (v3_pip.Mag() > exp (-0.08* (180./M_PI*v3_pip.Theta()) +2.85) -0.1)
-    continue;
-  
-/********************************************** Fill Missed PID AND T - Cut Histograms **********************************************/
+//if (v3_pip.Mag() > exp (-0.08* (180./M_PI*v3_pip.Theta()) +2.85) -0.1)
+   // continue;
+
+/********************************************** Fill T - Cut Histograms **********************************************/
 h_prot_p_theta_tcut_misid->Fill(180./M_PI*p4_prot_lead_kin->Theta(),v3_prot_lead.Mag());
 h_t_tcut_misid -> Fill(-t_mandel,weight);
 h_pip_from_Beam_uncut->Fill(180./M_PI*v3_pip.Angle(beam_mom));
@@ -470,4 +474,3 @@ outputTree->Write();
 fout->Close();
 
 }
-
