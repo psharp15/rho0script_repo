@@ -13,7 +13,7 @@ void analysis_rho0_2p(const char *inputfilename, const char *inputTreename, cons
 
 
   TFile *fout=new TFile(outfilename,"RECREATE");
-  TTree *outputTree = new TTree(outfilename,  outfilename);
+  TTree *outputTree = new TTree("analyzed_helium_2p_inc_data",  "analyzed_helium_2p_inc_data");
 
   float kin_chisq;
   UInt_t kin_ndf;
@@ -101,7 +101,7 @@ if (!inputTree)
 
   outputTree->Branch("p4_prot_lead",&p4_prot_lead_kin);
   outputTree->Branch("p4_prot_recoil",&p4_prot_recoil_kin);
-  outputTree->Branch("x4_prot_lead",x4_prot_lead_kin);
+  outputTree->Branch("x4_prot_lead",&x4_prot_lead_kin);
   outputTree->Branch("x4_prot_recoil",&x4_prot_recoil_kin);
   outputTree->Branch("pip_p4_kin",&p4_pip_kin);
   outputTree->Branch("pim_p4_kin",&p4_pim_kin);
@@ -311,8 +311,6 @@ const double pleadcutoff = 1;
     p4_prot_recoil_kin = p4_prot1_kin;
     x4_prot_lead_kin = x4_prot2_kin;
     x4_prot_recoil_kin = x4_prot1_kin;
-
-
 
     p4_prot_lead_thrown = p4_prot2_thrown;
     p4_prot_recoil_thrown = p4_prot1_thrown;
