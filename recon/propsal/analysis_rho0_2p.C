@@ -40,6 +40,7 @@ void analysis_rho0_2p(const char *inputfilename, const char *inputTreename, cons
   TLorentzVector *p4_beam_kin=0;
   TLorentzVector *x4_beam_kin=0;
   double weight;
+  double RF_time;
   double t;
   TLorentzVector *p4_beam_thrown=0;
   TLorentzVector *p4_pip_thrown=0;
@@ -83,6 +84,7 @@ if (!inputTree)
   inputTree->SetBranchAddress("beam_p4_kin",&p4_beam_kin);
   inputTree->SetBranchAddress("beam_x4_kin",&x4_beam_kin);
   inputTree->SetBranchAddress("accidweight",&weight);
+  inputTree->SetBranchAddress("RF_time",&RF_time);
   inputTree->SetBranchAddress("event",&event);
   inputTree->SetBranchAddress("thrownS",&thrownS);
   inputTree->SetBranchAddress("thrownT",&thrownT);
@@ -101,6 +103,7 @@ if (!inputTree)
   outputTree->Branch("pim_p4_kin",&p4_pim_kin);
   outputTree->Branch("beam_p4_kin",&p4_beam_kin);
   outputTree->Branch("accidweight",&weight);
+  outputTree->Branch("RF_time",&RF_time);
   outputTree->Branch("event",&event);
 
   outputTree->Branch("thrownBeam",&p4_beam_thrown);
@@ -117,7 +120,7 @@ if (!inputTree)
   vector<TH1 *> hist_list;
   TDirectory * dir_UnCut = fout->mkdir("UnCut");
   TDirectory * dir_TCut = fout->mkdir("TCut");
-  TDirectory * dir_MisId_TCut = fout->mkdir("MisId_TCut");
+  TDirectory * dir_EnergyBalance = fout->mkdir("Energy Balance");
   TDirectory * dir_protmisrecon = fout->mkdir("protmisrecon");
 
   /****** Confidence Level ******/
@@ -133,40 +136,40 @@ if (!inputTree)
     hist_list.push_back(h_zprot2vertex);
   TH1D *h_zprot_lead_vertex = new TH1D ("prot lead Zvertex","protlead Zvertex;Vertex z [cm];Counts",1000,0,100);
     hist_list.push_back(h_zprot2vertex);
-  /*TH2D *h_XYvertex = new TH2D("XYvertex","XYvertex;Vertex x [cm];Vertex y [cm]",50,-5,5,50,-5,5);
+  TH2D *h_XYvertex = new TH2D("XYvertex","XYvertex;Vertex x [cm];Vertex y [cm]",50,-5,5,50,-5,5);
     hist_list.push_back(h_XYvertex);
   TH2D *h_XYvertex_thrown = new TH2D("XYvertex_THROWN","XYvertex;Vertex x [cm];Vertex y [cm]",50,-5,5,50,-5,5);
-    hist_list.push_back(h_XYvertex_thrown);*/
+    hist_list.push_back(h_XYvertex_thrown);
   TH1D *h_coplanarity = new TH1D("Coplanarity","Coplanarity; rho Angle [Degrees]; prot Angle [Degrees];Counts",300,90, 270);
     hist_list.push_back(h_coplanarity);
 
   /****** PiPlus ******/
   TH2D *h_pip_p_theta_uncut = new TH2D ("pip_p_theta_uncut","Pip_PVSTheta_uncut; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
     hist_list.push_back(h_pip_p_theta_uncut);
-  TH2D *h_pip_p_theta_tcut_misid = new TH2D ("pip_p_theta_tcut_misid","Pip_PVSThetatcut_misid ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
-    hist_list.push_back(h_pip_p_theta_tcut_misid);
+  TH2D *h_pip_p_theta_eb = new TH2D ("pip_p_theta_eb","Pip_PVSTheta_eb ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
+    hist_list.push_back(h_pip_p_theta_eb);
   TH1D *h_pip_from_Beam_uncut = new TH1D("pip_from_Beam_uncut","pip_from_Beam; Angle [Degrees];Counts",300,0,180);
     hist_list.push_back(h_pip_from_Beam_uncut);
-  TH1D *h_pip_from_Beam_tcut_misid = new TH1D("pip_from_Beam_tcut_misid","pip_from_Beam; Angle [Degrees];Counts",300,0,180);
-    hist_list.push_back(h_pip_from_Beam_tcut_misid);
+  TH1D *h_pip_from_Beam_eb = new TH1D("pip_from_Beam_eb","pip_from_Beam; Angle [Degrees];Counts",300,0,180);
+    hist_list.push_back(h_pip_from_Beam_eb);
   TH2D *h_pip_p_theta_THROWN_uncut = new TH2D ("pip_p_theta_THROWN_uncut","Prot_PVSTheta ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
     hist_list.push_back(h_pip_p_theta_THROWN_uncut);
-  TH2D *h_pip_p_theta_THROWN_tcut_misid = new TH2D ("pip_p_theta_THROWN_tcut_misid","Prot_PVSTheta_tcut_misid; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
-    hist_list.push_back(h_pip_p_theta_THROWN_tcut_misid);
+  TH2D *h_pip_p_theta_THROWN_eb = new TH2D ("pip_p_theta_THROWN_eb","Prot_PVSTheta_eb; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
+    hist_list.push_back(h_pip_p_theta_THROWN_eb);
 
   /****** PiMinus ******/
 
   /****** Protons ******/
   TH2D *h_prot_p_theta_uncut = new TH2D ("prot_p_theta_uncut","Prot_PVSTheta ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
     hist_list.push_back(h_prot_p_theta_uncut);
-  TH2D *h_prot_p_theta_tcut_misid = new TH2D ("prot_p_theta_tcut_misid","Prot_PVSTheta_tcut_misid ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
-    hist_list.push_back(h_prot_p_theta_tcut_misid);
+  TH2D *h_prot_p_theta_eb = new TH2D ("prot_p_theta_eb","Prot_PVSTheta_eb ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
+   hist_list.push_back(h_prot_p_theta_eb);
   TH1D *h_prot_from_Beam_uncut = new TH1D("prot_from_Beam_uncut","prot_from_Beam; Angle [Degrees];Counts",300,0,180);
     hist_list.push_back(h_prot_from_Beam_uncut);
   TH2D *h_prot_p_theta_THROWN_uncut = new TH2D ("prot_p_theta_THROWN_uncut","Prot_PVSTheta ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
     hist_list.push_back(h_prot_p_theta_THROWN_uncut);
-  TH2D *h_prot_p_theta_THROWN_tcut_misid = new TH2D ("prot_p_theta_THROWN_tcut_misid","Prot_PVSTheta_tcut_misid; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
-    hist_list.push_back(h_prot_p_theta_THROWN_tcut_misid);
+  TH2D *h_prot_p_theta_THROWN_eb = new TH2D ("prot_p_theta_THROWN_eb","Prot_PVSTheta_eb; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
+    hist_list.push_back(h_prot_p_theta_THROWN_eb);
   TH3D *h_prot_duplicate_tracks_presort = new TH3D("prot_duplicate_tracks_presort","prot_duplicate_tracks PRE SORTING;p1.pX-p2.X[GeV];p1.pY-p2.pY[GeV];p1.pZ-p2.pZ[GeV]",100,-2,2,100,-2,2,100,-2,2);
     hist_list.push_back(h_prot_duplicate_tracks_presort);
   TH3D *h_prot_duplicate_tracks_uncut = new TH3D("prot_duplicate_tracks_uncut","prot_duplicate_tracks;p1.pX-p2.X[GeV];p1.pY-p2.pY[GeV];p1.pZ-p2.pZ[GeV]",50,-2,2,50,-2,2,50,-2,2);
@@ -182,82 +185,94 @@ if (!inputTree)
   /****** PMiss ******/
   TH1D *h_pmissVSbeam = new TH1D("pmissVSbeam","pmissVSbeam;pmiss;beam", 200, -1, 1);
     hist_list.push_back(h_pmissVSbeam);
-  TH1D *h_pmissVSbeam_tcut_misid = new TH1D("pmissVSbeam_tcut_misid","h_pmissVSbeam_tcut_misid;pmiss Angle to beam ;counts", 200, -1, 1);
-    hist_list.push_back(h_pmissVSbeam_tcut_misid);
+  TH1D *h_pmissVSbeam_eb = new TH1D("pmissVSbeam_eb","h_pmissVSbeam_eb;pmiss Angle to beam ;counts", 200, -1, 1);
+    hist_list.push_back(h_pmissVSbeam_eb);
   TH1D *h_pmissZ_uncut = new TH1D ("pmissZ_uncut","hmissZ;z_pmiss;counts", 200, -10,10);
     hist_list.push_back(h_pmissZ_uncut);
-  TH1D *h_pmissZ_tcut_misid = new TH1D ("pmissZ_tcut_misid","pmissZ_tcut_misid;z_pmiss;counts", 200, -10,10);
-    hist_list.push_back(h_pmissZ_tcut_misid);
+  TH1D *h_pmissZ_eb = new TH1D ("pmissZ_eb","pmissZ_eb;z_pmiss;counts", 200, -10,10);
+    hist_list.push_back(h_pmissZ_eb);
   TH2D *h_pmissZ_s_uncut = new TH2D ("pmiss_s_uncut","pmiss_s_uncut;z_pmiss;s;counts", 200, -10,10,20,0,20);
     hist_list.push_back(h_pmissZ_s_uncut);
   TH2D *h_pmissAngle_s_uncut = new TH2D ("pmissAngle_s","pmissAngle_s;pmissAngle;s;counts", 200, -10,10,20,0,20);
     hist_list.push_back(h_pmissAngle_s_uncut);
   TH2D *h_pmissZ_perp_uncut = new TH2D ("pmissZ_perp_uncut","pmissZ_vs_perp;pmiss.Z;pmiss_perp;counts", 200, -2,2, 200, 0,2);
     hist_list.push_back(h_pmissZ_perp_uncut);
-  TH2D *h_pmissZ_perp_tcut_misid = new TH2D ("pmissZ_perp_tcut_misid","pmissZ_vs_t_tcut_misid;pmiss;pmiss_perp;counts", 200, -2,2, 200, 0,2);
-    hist_list.push_back(h_pmissZ_perp_tcut_misid);
+  TH2D *h_pmissZ_perp_eb = new TH2D ("pmissZ_perp_eb","pmissZ_vs_t_eb;pmiss;pmiss_perp;counts", 200, -2,2, 200, 0,2);
+    hist_list.push_back(h_pmissZ_perp_eb);
   TH2D *h_pmiss_Mag_Angle_uncut = new TH2D ("pmiss_Mag_Angle_uncut","pmiss_Mag_Angl_uncut;pmiss angle;pmiss mag", 200, -1,1, 200, 0,3);
     hist_list.push_back(h_pmiss_Mag_Angle_uncut);
-  TH2D *h_pmiss_Mag_Angle_tcut_misid = new TH2D ("pmiss_Mag_Angle_tcut_misid","pmiss_Mag_Angle_tcut_misid;pmiss angle;pmiss mag", 200, -1,1, 200, 0,3);
-    hist_list.push_back(h_pmiss_Mag_Angle_tcut_misid);
+  TH2D *h_pmiss_Mag_Angle_eb = new TH2D ("pmiss_Mag_Angle_eb","pmiss_Mag_Angle_eb;pmiss angle;pmiss mag", 200, -1,1, 200, 0,3);
+    hist_list.push_back(h_pmiss_Mag_Angle_eb);
 
   TH1D *h_pmiss_uncut = new TH1D("pmiss_uncut", "Missing Momentum [GeV];Counts",200,0.,2.);
     hist_list.push_back(h_pmiss_uncut);
   TH1D *h_pmiss_tcut = new TH1D("pmiss_tcut", "Missing Momentum [GeV];pmiss[GeV];Counts",200,0.,2.);
     hist_list.push_back(h_pmiss_tcut);
-  TH1D *h_pmiss_tcut_misid = new TH1D("pmiss_tcut_misid", "Missing Momentum [GeV];pmiss[GeV];Counts",200,0.,2.);
-    hist_list.push_back(h_pmiss_tcut_misid);
+  TH1D *h_pmiss_eb = new TH1D("pmiss_eb", "Missing Momentum [GeV];pmiss[GeV];Counts",200,0.,2.);
+    hist_list.push_back(h_pmiss_eb);
   TH1D *h_pmiss_THROWN_uncut = new TH1D("pmiss_THROWN_uncut", "Missing Momentum [GeV];pmiss[GeV];Counts",200,0.,2.);
     hist_list.push_back(h_pmiss_THROWN_uncut);
-  TH1D *h_pmiss_THROWN_tcut_misid = new TH1D("pmiss_THROWN_tcut_misid", "Missing Momentum [GeV];pmiss[GeV];Counts",200,0.,2.);
-    hist_list.push_back(h_pmiss_THROWN_tcut_misid);
+  TH1D *h_pmiss_THROWN_eb = new TH1D("pmiss_THROWN_eb", "Missing Momentum [GeV];pmiss[GeV];Counts",200,0.,2.);
+    hist_list.push_back(h_pmiss_THROWN_eb);
 
   /****** Rho0 Mass ******/
-  TH1D *h_rho0counts_uncut = new TH1D("Rho0_Counts_uncut","Rho0Counts_before;Mass [GeV];Counts",300,0,3);
+  TH1D *h_rho0counts_uncut = new TH1D("Rho0_Counts_uncut","Rho0Counts_before;Mass [GeV];Counts",90,0,3);
     hist_list.push_back(h_rho0counts_uncut);
-  TH1D *h_rho0counts_tcut = new TH1D("Rho0 Counts_tcut","Rho0Counts_tcut;Mass [GeV];Counts",100,0,5);
+  TH1D *h_rho0counts_tcut = new TH1D("Rho0_Counts_tcut","Rho0Counts_tcut;Mass [GeV];Counts",90,0,5);
     hist_list.push_back(h_rho0counts_tcut);
-  TH1D *h_rho0counts_tcut_misid = new TH1D("Rho0 Counts_tcut_misid","Rho0Counts_tcut_misid;Mass [GeV];Counts",100,0,5);
-    hist_list.push_back(h_rho0counts_tcut_misid);
+TH1D *h_rho0counts_eb = new TH1D("Rho0_Counts_eb","Rho0Counts_eb;Mass [GeV];Counts",90,0,5);
+    hist_list.push_back(h_rho0counts_eb);
   TH1D *h_rho0counts_THROWN_uncut = new TH1D("Rho0_Counts_THROWN_funcut","Rho0Counts_before;Mass [GeV];Counts",300,0,3);
     hist_list.push_back(h_rho0counts_THROWN_uncut);
   TH1D *h_rho0counts_THROWN_tcut = new TH1D("Rho0Counts_THROWN_tcut","Rho0Counts_tcut;Mass [GeV];Counts",100,0,5);
     hist_list.push_back(h_rho0counts_THROWN_tcut);
-  TH1D *h_rho0counts_THROWN_tcut_misid = new TH1D("Rho0_Counts_THROWN_tcut_misid","Rho0Counts_tcut_misid;Mass [GeV];Counts",100,0,5);
-    hist_list.push_back(h_rho0counts_THROWN_tcut_misid);
+TH1D *h_rho0counts_THROWN_eb = new TH1D("Rho0Counts_THROWN_eb","Rho0Counts_eb;Mass [GeV];Counts",100,0,5);
+      hist_list.push_back(h_rho0counts_THROWN_eb);
 
   /****** PMiss vs Rho0 Mass ******/
   TH2D *h_pmiss_vs_rho0counts_uncut = new TH2D("rho0counts_vs_Pmiss_uncut","rho0 vs pmiss before;rho0_before[GeV];PMiss;Counts_after",100,0,5,200,0.,2.);
     hist_list.push_back(h_pmiss_vs_rho0counts_uncut);
-  TH2D *h_pmiss_vs_rho0counts_tcut = new TH2D("rho0counts_during vs Pmiss_during","rho0 vs pmiss after;rho0_during[GeV];PMiss_during;Counts",100,0,5,200,0.,2.);
+  TH2D *h_pmiss_vs_rho0counts_tcut = new TH2D("rho0counts_tcut vs Pmiss_tcut","rho0 vs pmiss tcut;rho0_tcut[GeV];PMiss_tcut;Counts",100,0,5,200,0.,2.);
     hist_list.push_back(h_pmiss_vs_rho0counts_tcut);
-  TH2D *h_pmiss_vs_rho0counts_tcut_misid = new TH2D("rho0counts_tcut_misid vs Pmiss_tcut_misid","rho0 vs pmiss after;rho0_after [GeV];PMiss_after;Counts",100,0,5,200,0.,2.);
-    hist_list.push_back(h_pmiss_vs_rho0counts_tcut_misid);
+TH2D *h_pmiss_vs_rho0counts_eb = new TH2D("rho0counts_eb vs Pmiss_eb","rho0 vs pmiss eb;rho0_ev[GeV];PMiss_ev;Counts",100,0,5,200,0.,2.);
+    hist_list.push_back(h_pmiss_vs_rho0counts_eb);
 
   /****** T ******/
   TH1D *h_t_uncut = new TH1D("t_uncut","t;-t [GeV^2]",20,0,20);
     hist_list.push_back(h_t_uncut);
   TH1D *h_t_tcut = new TH1D("t_tcut","t;-t [GeV^2]",20,0,20);
     hist_list.push_back(h_t_tcut);
-  TH1D *h_t_tcut_misid = new TH1D("t_tcut_misid","t;-t [GeV^2]",20,0,20);
-    hist_list.push_back(h_t_tcut_misid);
+TH1D *h_t_eb = new TH1D("t_eb","t;-t [GeV^2]",20,0,20);
+ hist_list.push_back(h_t_eb);
 
   /****** PMinus ******/
   TH1D *h_pminus_pmiss_uncut = new TH1D("pminus_Pmiss","pminus_pmiss;pminus",50,0,2);
     hist_list.push_back(h_pminus_pmiss_uncut);
-  TH1D *h_pminus_pmiss_tcut_misid = new TH1D("pminus_Pmiss_tcut_misid","pminus_pmiss;pminus",50,0,2);
-    hist_list.push_back(h_pminus_pmiss_tcut_misid);
+TH1D *h_pminus_pmiss_eb = new TH1D("pminus_Pmiss_eb","pminus_pmiss;pminus",50,0,2);     hist_list.push_back(h_pminus_pmiss_eb);
 
   /****** Energy Balance ******/
-  TH1D *h_energy_balance = new TH1D ("energy_balance","Energy Balance; Mass of Target ;counts",50,0,30);
+  TH1D *h_energy_balance = new TH1D ("energy_balance","Energy Balance; Final energy- initial energy ;counts",50,-10,10);
     hist_list.push_back(h_energy_balance);
-  TH1D *h_energy_balance_thrown = new TH1D("energy_balance_thrown","Energy Balance; Mass of Target ;counts",50,0,30);
-    hist_list.push_back(h_energy_balance_thrown);
+    TH1D *h_energy_balance_eb = new TH1D ("energy_balance_eb","Energy Balance CUT; Final energy- initial energy ;counts",50,-10,10);
+      hist_list.push_back(h_energy_balance_eb);
+//TH1D *h_energy_balance = new TH1D ("energy_balance","Energy Balance; Final energy- initial energy ;counts",50,-10,10);
+    //hist_list.push_back(h_energy_balance);
+
+/******Beam energy *****/
+TH1D *h_beamenergy_uncut_unweighted = new TH1D("beamenergy_uncut_unweighted","beamenergy_uncut;beam energry [GeV]; counts", 120,0,12);
+	hist_list.push_back(h_beamenergy_uncut_unweighted);
+TH1D *h_beamenergy_uncut = new TH1D("beamenergy_uncut","beamenergy_uncut;beam energry [GeV]; counts", 120,0,12);
+	hist_list.push_back(h_beamenergy_uncut);
+TH1D *h_beamenergy_tcut = new TH1D("beamenergy_tcut","beamenergy_tcut;beam energry [GeV]; counts", 120,0,12);
+	hist_list.push_back(h_beamenergy_tcut);
+TH1D *h_beamenergy_eb = new TH1D("beamenergy_eb","beamenergy_eb;beam energry [GeV]; counts", 120,0,12);
+	hist_list.push_back(h_beamenergy_eb);
+
 
 /********************************************** Event Loop **********************************************/
 for( int event=0; event < inputTree-> GetEntries(); event++){
 
-  if (event%10000==0)
+  if (event%100000==0)
   cerr << "Working on event " << event << "\n";
 
   inputTree-> GetEvent(event);
@@ -268,7 +283,8 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
     continue;
 
   h_prot_duplicate_tracks_presort->Fill(p4_prot1_kin->X()-p4_prot2_kin->X(),p4_prot1_kin->Y()-p4_prot2_kin->Y(),p4_prot1_kin->Z()-p4_prot2_kin->Z());
-
+h_beamenergy_uncut_unweighted ->Fill(p4_beam_kin->E());
+h_beamenergy_uncut->Fill(p4_beam_kin->E(),weight);
 
 /********************************************** Sorting Protons **********************************************/
 
@@ -320,17 +336,17 @@ const double pleadcutoff = 1;
   double t_mandel = (*p4_beam_kin - p4_rho0_kin).M2();
   double s_mandel = (*p4_prot_lead_kin + p4_rho0_kin).M2();
 
-  TLorentzVector energy_balance = (*p4_pip_kin + *p4_pim_kin - *p4_beam_kin + *p4_prot1_kin + *p4_prot2_kin);
-  TLorentzVector energy_balance_thrown = (*p4_pip_thrown + *p4_pim_thrown - *p4_beam_thrown + *p4_prot1_thrown + *p4_prot2_thrown);
+  TLorentzVector delta4mom = (*p4_pip_kin + *p4_pim_kin + *p4_prot1_kin + *p4_prot2_kin - TLorentzVector( 0,0,0,2*mN) - *p4_beam_kin);
 
 /********************************************** Fill Uncut Histograms **********************************************/
   h_CL_cut->Fill(TMath::Prob(kin_chisq,kin_ndf),weight);
   h_zprot1vertex->Fill(x4_prot1_meas->Z(),weight);
   h_zprot2vertex->Fill(x4_prot2_meas->Z(),weight);
+  h_XYvertex->Fill(p4_prot2_meas->X(),p4_prot2_meas->Y(),weight);
 
   h_pmiss_uncut->Fill((p3_pmiss).Mag(),weight);
   h_pmiss_THROWN_uncut -> Fill(p3_pmiss_thrown.Mag(),weight);
-  h_rho0counts_uncut->Fill(p4_rho0_kin.M());
+  h_rho0counts_uncut->Fill(p4_rho0_kin.M(),weight);
   h_rho0counts_THROWN_uncut->Fill(p4_rho0_thrown.M());
   h_t_uncut->Fill(-t_mandel,weight);
   h_pmiss_vs_rho0counts_uncut->Fill((p4_rho0_kin).M(),p3_pmiss.Mag(),weight);
@@ -351,8 +367,7 @@ const double pleadcutoff = 1;
   h_pminus_pmiss_uncut->Fill(p4_pmiss.Minus(),weight);
   h_pmiss_Mag_Angle_uncut->Fill(p4_pmiss.CosTheta(),p4_pmiss.Vect().Mag(),weight);
 
-  h_energy_balance->Fill(energy_balance.P());
-  h_energy_balance_thrown->Fill(energy_balance_thrown.P());
+  h_energy_balance->Fill(delta4mom.E(), weight);
 
 /********************************************** T - Cut **********************************************/
 if (-t_mandel < 1)
@@ -362,33 +377,43 @@ if (-t_mandel < 1)
 
 h_t_tcut -> Fill(-t_mandel,weight);
 h_pmiss_tcut -> Fill(p3_pmiss.Mag(),weight);
-h_rho0counts_tcut -> Fill(p4_rho0_kin.M());
+h_rho0counts_tcut -> Fill(p4_rho0_kin.M(),weight);
 h_rho0counts_THROWN_tcut->Fill(p4_rho0_thrown.M());
 h_pmiss_vs_rho0counts_tcut -> Fill((p4_rho0_kin).M(),p3_pmiss.Mag(),weight);
+h_beamenergy_tcut->Fill(p4_beam_kin->E(),weight);
 
 /********************************************** Missed PID - Cut **********************************************/
 //if (v3_pip.Mag() > exp (-0.08* (180./M_PI*v3_pip.Theta()) +2.85) -0.1)
    // continue;
+   //
+/********************************************** Energy Balance - Cut **********************************************/
+   if (delta4mom.E() < -3 || delta4mom.E() >3)
+       continue;
 
-/********************************************** Fill T - Cut Histograms **********************************************/
-h_prot_p_theta_tcut_misid->Fill(180./M_PI*p4_prot_lead_kin->Theta(),v3_prot_lead.Mag());
-h_t_tcut_misid -> Fill(-t_mandel,weight);
+/********************************************** Fill Energy Balance Cut Histograms **********************************************/
+h_energy_balance_eb->Fill(delta4mom.E(), weight);
+
+h_t_eb -> Fill(-t_mandel,weight);
 h_pip_from_Beam_uncut->Fill(180./M_PI*v3_pip.Angle(beam_mom));
-h_pmiss_tcut_misid -> Fill(p3_pmiss.Mag(),weight);
-h_pmiss_THROWN_tcut_misid -> Fill(p3_pmiss_thrown.Mag(),weight);
-h_rho0counts_tcut_misid -> Fill(p4_rho0_kin.M());
-h_rho0counts_THROWN_tcut_misid->Fill(p4_rho0_thrown.M());
-h_pmiss_vs_rho0counts_tcut_misid -> Fill((p4_rho0_kin).M(),p3_pmiss.Mag(),weight);
-h_pmissVSbeam_tcut_misid -> Fill(p3_pmiss.CosTheta(),weight);
-h_pip_p_theta_tcut_misid -> Fill(180./M_PI*v3_pip.Theta(),v3_pip.Mag());
+h_pmiss_eb -> Fill(p3_pmiss.Mag(),weight);
+h_pmiss_THROWN_eb -> Fill(p3_pmiss_thrown.Mag(),weight);
+h_rho0counts_eb -> Fill(p4_rho0_kin.M());
+h_rho0counts_THROWN_eb->Fill(p4_rho0_thrown.M());
+h_pmiss_vs_rho0counts_eb -> Fill((p4_rho0_kin).M(),p3_pmiss.Mag(),weight);
+h_pmissVSbeam_eb -> Fill(p3_pmiss.CosTheta(),weight);
+h_pip_p_theta_eb -> Fill(180./M_PI*v3_pip.Theta(),v3_pip.Mag());
 
-h_pmissZ_tcut_misid ->Fill(p3_pmiss.Z(),weight);
-h_pmissZ_perp_tcut_misid ->Fill(p4_pmiss.Z(),p3_pmiss.Perp(),weight);
-h_pminus_pmiss_tcut_misid ->Fill(p4_pmiss.Minus(),weight);
-h_pmiss_Mag_Angle_tcut_misid ->Fill(p4_pmiss.CosTheta(),p4_pmiss.Vect().Mag(),weight);
+h_pmissZ_eb ->Fill(p3_pmiss.Z(),weight);
+h_pmissZ_perp_eb ->Fill(p4_pmiss.Z(),p3_pmiss.Perp(),weight);
+h_pminus_pmiss_eb ->Fill(p4_pmiss.Minus(),weight);
+h_pmiss_Mag_Angle_eb ->Fill(p4_pmiss.CosTheta(),p4_pmiss.Vect().Mag(),weight);
 
-h_prot_p_theta_THROWN_tcut_misid->Fill(180./M_PI*v3_prot_lead_thrown.Theta(),v3_prot_lead_thrown.Mag());
-h_pip_p_theta_THROWN_tcut_misid->Fill(180./M_PI*v3_pip_thrown.Theta(),v3_pip_thrown.Mag());
+h_beamenergy_eb->Fill(p4_beam_kin->E(),weight);
+
+h_prot_p_theta_THROWN_eb->Fill(180./M_PI*v3_prot_lead_thrown.Theta(),v3_prot_lead_thrown.Mag());
+h_pip_p_theta_THROWN_eb->Fill(180./M_PI*v3_pip_thrown.Theta(),v3_pip_thrown.Mag());
+
+
 
 /********************************************** Cutting on Duplicate Track Protons **********************************************/
   if ((fabs(p4_prot1_kin->X() - p4_prot2_kin->X()) == 0.01) && (fabs(p4_prot1_kin->Y() - p4_prot2_kin->Y()) == 0.01) && (fabs(p4_prot1_kin->Z() - p4_prot2_kin->Z()) == 0.01))
@@ -411,8 +436,10 @@ h_CL_cut->Write();
 h_zprot1vertex->Write();
 h_zprot2vertex->Write();
 h_zprot_lead_vertex->Write();
-h_energy_balance->Write();
-h_energy_balance_thrown->Write();
+h_XYvertex->Write();
+
+h_beamenergy_uncut_unweighted->Write();
+h_beamenergy_uncut->Write();
 
 fout->cd("UnCut");
 h_pmiss_uncut->Write();
@@ -435,6 +462,10 @@ h_pmissAngle_s_uncut->Write();
 h_pmissZ_perp_uncut->Write();
 h_pminus_pmiss_uncut->Write();
 h_pmiss_Mag_Angle_uncut->Write();
+h_beamenergy_uncut_unweighted->Write();
+h_beamenergy_uncut->Write();
+h_energy_balance->Write();
+
 fout->cd();
 
 fout->cd("TCut");
@@ -443,25 +474,27 @@ h_pmiss_tcut->Write();
 h_rho0counts_tcut->Write();
 h_rho0counts_THROWN_tcut->Write();
 h_pmiss_vs_rho0counts_tcut->Write();
+h_beamenergy_tcut->Write();
 fout->cd();
 
-fout->cd("MisId_TCut");
-h_t_tcut_misid->Write();
-h_pmiss_tcut_misid->Write();
-h_pmiss_THROWN_tcut_misid->Write();
-h_pmiss_vs_rho0counts_tcut_misid->Write();
-h_rho0counts_tcut_misid->Write();
-h_rho0counts_THROWN_tcut_misid->Write();
-h_pmissVSbeam_tcut_misid->Write();
-h_pip_p_theta_tcut_misid->Write();
-h_pip_p_theta_THROWN_tcut_misid->Write();
-h_prot_p_theta_tcut_misid->Write();
-h_prot_p_theta_THROWN_tcut_misid->Write();
-
-h_pmissZ_tcut_misid->Write();
-h_pmissZ_perp_tcut_misid->Write();
-h_pminus_pmiss_tcut_misid->Write();
-h_pmiss_Mag_Angle_tcut_misid->Write();
+fout->cd("Energy Balance");
+h_energy_balance_eb->Write();
+h_t_eb->Write();
+h_pmiss_eb->Write();
+h_pmiss_THROWN_eb->Write();
+h_pmiss_vs_rho0counts_eb->Write();
+h_rho0counts_eb->Write();
+//h_rho0counts_THROWN_eb->Write();
+h_pmissVSbeam_eb->Write();
+h_pip_p_theta_eb->Write();
+h_pip_p_theta_THROWN_eb->Write();
+h_prot_p_theta_eb->Write();
+h_prot_p_theta_THROWN_eb->Write();
+h_pmissZ_eb->Write();
+h_pmissZ_perp_eb->Write();
+//h_pminus_pmiss_eb->Write();
+h_pmiss_Mag_Angle_eb->Write();
+h_beamenergy_eb->Write();
 fout->cd();
 
 fout->cd("protmisrecon");
