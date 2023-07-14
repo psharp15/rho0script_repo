@@ -53,6 +53,8 @@ void analysis_rho0_2p(const char *inputfilename, const char *inputTreename, cons
 
   TLorentzVector *p4_prot_lead_kin=0;
   TLorentzVector *p4_prot_recoil_kin=0;
+  TLorentzVector *x4_prot_lead_kin=0;
+  TLorentzVector *x4_prot_recoil_kin=0;
   TLorentzVector *p4_prot_lead_thrown=0;
   TLorentzVector *p4_prot_recoil_thrown=0;
 
@@ -99,6 +101,8 @@ if (!inputTree)
 
   outputTree->Branch("p4_prot_lead",&p4_prot_lead_kin);
   outputTree->Branch("p4_prot_recoil",&p4_prot_recoil_kin);
+  outputTree->Branch("x4_prot_lead",x4_prot_lead_kin);
+  outputTree->Branch("x4_prot_recoil",&x4_prot_recoil_kin);
   outputTree->Branch("pip_p4_kin",&p4_pip_kin);
   outputTree->Branch("pim_p4_kin",&p4_pim_kin);
   outputTree->Branch("beam_p4_kin",&p4_beam_kin);
@@ -130,11 +134,11 @@ if (!inputTree)
     hist_list.push_back(h_CL_cut);
 
   /****** Vert ******/
-  TH1D *h_zprot1vertex = new TH1D ("prot1 Zvertex","prot1 Zvertex;Vertex z [cm];Counts",1000,0,100);
+  TH1D *h_zprot1vertex = new TH1D ("prot1 Zvertex","prot1 Zvertex;Vertex z [cm];Counts",50,0,100);
     hist_list.push_back(h_zprot1vertex);
-  TH1D *h_zprot2vertex = new TH1D ("prot2 Zvertex","prot2 Zvertex;Vertex z [cm];Counts",1000,0,100);
+  TH1D *h_zprot2vertex = new TH1D ("prot2 Zvertex","prot2 Zvertex;Vertex z [cm];Counts",50,0,100);
     hist_list.push_back(h_zprot2vertex);
-  TH1D *h_zprot_lead_vertex = new TH1D ("prot lead Zvertex","protlead Zvertex;Vertex z [cm];Counts",1000,0,100);
+  TH1D *h_zprot_lead_vertex = new TH1D ("prot lead Zvertex","protlead Zvertex;Vertex z [cm];Counts",50,0,100);
     hist_list.push_back(h_zprot2vertex);
   TH2D *h_XYvertex = new TH2D("XYvertex","XYvertex;Vertex x [cm];Vertex y [cm]",50,-5,5,50,-5,5);
     hist_list.push_back(h_XYvertex);
@@ -294,6 +298,8 @@ const double pleadcutoff = 1;
   {
     p4_prot_lead_kin = p4_prot1_kin;
     p4_prot_recoil_kin = p4_prot2_kin;
+    x4_prot_lead_kin = x4_prot1_kin;
+    x4_prot_recoil_kin = x4_prot2_kin;
 
     p4_prot_lead_thrown = p4_prot1_thrown;
     p4_prot_recoil_thrown = p4_prot2_thrown;
@@ -303,6 +309,8 @@ const double pleadcutoff = 1;
   {
     p4_prot_lead_kin = p4_prot2_kin;
     p4_prot_recoil_kin = p4_prot1_kin;
+    x4_prot_lead_kin = x4_prot2_kin;
+    x4_prot_recoil_kin = x4_prot1_kin;
 
     p4_prot_lead_thrown = p4_prot2_thrown;
     p4_prot_recoil_thrown = p4_prot1_thrown;
