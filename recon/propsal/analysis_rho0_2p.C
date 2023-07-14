@@ -128,9 +128,9 @@ if (!inputTree)
   TDirectory * dir_protmisrecon = fout->mkdir("protmisrecon");
 
   /****** Confidence Level ******/
-  TH1D *h_CL_uncut = new TH1D ("ConfidenceLevel_UNCUT","Confidence Level UNCUT;Confidence Level;Counts",200,0,1);
+    TH1D *h_CL_uncut = new TH1D ("ConfidenceLevel_UNCUT","Confidence Level UNCUT;Confidence Level;Counts",200,0,1);
     hist_list.push_back(h_CL_uncut);
-  TH1D *h_CL_cut = new TH1D ("ConfidenceLevel_CUT","Confidence Level CUT;Confidence Level;Counts",200,0,1);
+    TH1D *h_CL_cut = new TH1D ("ConfidenceLevel_CUT","Confidence Level CUT;Confidence Level;Counts",200,0,1);
     hist_list.push_back(h_CL_cut);
 
   /****** Vert ******/
@@ -224,13 +224,13 @@ if (!inputTree)
     hist_list.push_back(h_rho0counts_uncut);
   TH1D *h_rho0counts_tcut = new TH1D("Rho0_Counts_tcut","Rho0Counts_tcut;Mass [GeV];Counts",90,0,5);
     hist_list.push_back(h_rho0counts_tcut);
-TH1D *h_rho0counts_eb = new TH1D("Rho0_Counts_eb","Rho0Counts_eb;Mass [GeV];Counts",90,0,5);
+    TH1D *h_rho0counts_eb = new TH1D("Rho0_Counts_eb","Rho0Counts_eb;Mass [GeV];Counts",90,0,5);
     hist_list.push_back(h_rho0counts_eb);
   TH1D *h_rho0counts_THROWN_uncut = new TH1D("Rho0_Counts_THROWN_funcut","Rho0Counts_before;Mass [GeV];Counts",300,0,3);
     hist_list.push_back(h_rho0counts_THROWN_uncut);
   TH1D *h_rho0counts_THROWN_tcut = new TH1D("Rho0Counts_THROWN_tcut","Rho0Counts_tcut;Mass [GeV];Counts",100,0,5);
     hist_list.push_back(h_rho0counts_THROWN_tcut);
-TH1D *h_rho0counts_THROWN_eb = new TH1D("Rho0Counts_THROWN_eb","Rho0Counts_eb;Mass [GeV];Counts",100,0,5);
+    TH1D *h_rho0counts_THROWN_eb = new TH1D("Rho0Counts_THROWN_eb","Rho0Counts_eb;Mass [GeV];Counts",100,0,5);
       hist_list.push_back(h_rho0counts_THROWN_eb);
 
   /****** PMiss vs Rho0 Mass ******/
@@ -238,7 +238,7 @@ TH1D *h_rho0counts_THROWN_eb = new TH1D("Rho0Counts_THROWN_eb","Rho0Counts_eb;Ma
     hist_list.push_back(h_pmiss_vs_rho0counts_uncut);
   TH2D *h_pmiss_vs_rho0counts_tcut = new TH2D("rho0counts_tcut vs Pmiss_tcut","rho0 vs pmiss tcut;rho0_tcut[GeV];PMiss_tcut;Counts",100,0,5,200,0.,2.);
     hist_list.push_back(h_pmiss_vs_rho0counts_tcut);
-TH2D *h_pmiss_vs_rho0counts_eb = new TH2D("rho0counts_eb vs Pmiss_eb","rho0 vs pmiss eb;rho0_ev[GeV];PMiss_ev;Counts",100,0,5,200,0.,2.);
+    TH2D *h_pmiss_vs_rho0counts_eb = new TH2D("rho0counts_eb vs Pmiss_eb","rho0 vs pmiss eb;rho0_ev[GeV];PMiss_ev;Counts",100,0,5,200,0.,2.);
     hist_list.push_back(h_pmiss_vs_rho0counts_eb);
 
   /****** T ******/
@@ -246,30 +246,30 @@ TH2D *h_pmiss_vs_rho0counts_eb = new TH2D("rho0counts_eb vs Pmiss_eb","rho0 vs p
     hist_list.push_back(h_t_uncut);
   TH1D *h_t_tcut = new TH1D("t_tcut","t;-t [GeV^2]",20,0,20);
     hist_list.push_back(h_t_tcut);
-TH1D *h_t_eb = new TH1D("t_eb","t;-t [GeV^2]",20,0,20);
+    TH1D *h_t_eb = new TH1D("t_eb","t;-t [GeV^2]",20,0,20);
  hist_list.push_back(h_t_eb);
 
   /****** PMinus ******/
   TH1D *h_pminus_pmiss_uncut = new TH1D("pminus_Pmiss","pminus_pmiss;pminus",50,0,2);
     hist_list.push_back(h_pminus_pmiss_uncut);
-TH1D *h_pminus_pmiss_eb = new TH1D("pminus_Pmiss_eb","pminus_pmiss;pminus",50,0,2);     hist_list.push_back(h_pminus_pmiss_eb);
+    TH1D *h_pminus_pmiss_eb = new TH1D("pminus_Pmiss_eb","pminus_pmiss;pminus",50,0,2);     hist_list.push_back(h_pminus_pmiss_eb);
 
   /****** Energy Balance ******/
   TH1D *h_energy_balance = new TH1D ("energy_balance","Energy Balance; Final energy- initial energy ;counts",50,-10,10);
     hist_list.push_back(h_energy_balance);
     TH1D *h_energy_balance_eb = new TH1D ("energy_balance_eb","Energy Balance CUT; Final energy- initial energy ;counts",50,-10,10);
       hist_list.push_back(h_energy_balance_eb);
-//TH1D *h_energy_balance = new TH1D ("energy_balance","Energy Balance; Final energy- initial energy ;counts",50,-10,10);
+      //TH1D *h_energy_balance = new TH1D ("energy_balance","Energy Balance; Final energy- initial energy ;counts",50,-10,10);
     //hist_list.push_back(h_energy_balance);
 
-/******Beam energy *****/
-TH1D *h_beamenergy_uncut_unweighted = new TH1D("beamenergy_uncut_unweighted","beamenergy_uncut;beam energry [GeV]; counts", 120,0,12);
+ /******Beam energy *****/
+    TH1D *h_beamenergy_uncut_unweighted = new TH1D("beamenergy_uncut_unweighted","beamenergy_uncut;beam energry [GeV]; counts", 120,0,12);
 	hist_list.push_back(h_beamenergy_uncut_unweighted);
-TH1D *h_beamenergy_uncut = new TH1D("beamenergy_uncut","beamenergy_uncut;beam energry [GeV]; counts", 120,0,12);
+	TH1D *h_beamenergy_uncut = new TH1D("beamenergy_uncut","beamenergy_uncut;beam energry [GeV]; counts", 120,0,12);
 	hist_list.push_back(h_beamenergy_uncut);
-TH1D *h_beamenergy_tcut = new TH1D("beamenergy_tcut","beamenergy_tcut;beam energry [GeV]; counts", 120,0,12);
+	TH1D *h_beamenergy_tcut = new TH1D("beamenergy_tcut","beamenergy_tcut;beam energry [GeV]; counts", 120,0,12);
 	hist_list.push_back(h_beamenergy_tcut);
-TH1D *h_beamenergy_eb = new TH1D("beamenergy_eb","beamenergy_eb;beam energry [GeV]; counts", 120,0,12);
+	TH1D *h_beamenergy_eb = new TH1D("beamenergy_eb","beamenergy_eb;beam energry [GeV]; counts", 120,0,12);
 	hist_list.push_back(h_beamenergy_eb);
 
 
@@ -287,8 +287,8 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
     continue;
 
   h_prot_duplicate_tracks_presort->Fill(p4_prot1_kin->X()-p4_prot2_kin->X(),p4_prot1_kin->Y()-p4_prot2_kin->Y(),p4_prot1_kin->Z()-p4_prot2_kin->Z());
-h_beamenergy_uncut_unweighted ->Fill(p4_beam_kin->E());
-h_beamenergy_uncut->Fill(p4_beam_kin->E(),weight);
+  h_beamenergy_uncut_unweighted ->Fill(p4_beam_kin->E());
+  h_beamenergy_uncut->Fill(p4_beam_kin->E(),weight);
 
 /********************************************** Sorting Protons **********************************************/
 
@@ -311,6 +311,8 @@ const double pleadcutoff = 1;
     p4_prot_recoil_kin = p4_prot1_kin;
     x4_prot_lead_kin = x4_prot2_kin;
     x4_prot_recoil_kin = x4_prot1_kin;
+
+
 
     p4_prot_lead_thrown = p4_prot2_thrown;
     p4_prot_recoil_thrown = p4_prot1_thrown;
@@ -383,12 +385,12 @@ if (-t_mandel < 1)
 
 /********************************************** Fill T - Cut Histograms **********************************************/
 
-h_t_tcut -> Fill(-t_mandel,weight);
-h_pmiss_tcut -> Fill(p3_pmiss.Mag(),weight);
-h_rho0counts_tcut -> Fill(p4_rho0_kin.M(),weight);
-h_rho0counts_THROWN_tcut->Fill(p4_rho0_thrown.M());
-h_pmiss_vs_rho0counts_tcut -> Fill((p4_rho0_kin).M(),p3_pmiss.Mag(),weight);
-h_beamenergy_tcut->Fill(p4_beam_kin->E(),weight);
+    h_t_tcut -> Fill(-t_mandel,weight);
+    h_pmiss_tcut -> Fill(p3_pmiss.Mag(),weight);
+    h_rho0counts_tcut -> Fill(p4_rho0_kin.M(),weight);
+    h_rho0counts_THROWN_tcut->Fill(p4_rho0_thrown.M());
+    h_pmiss_vs_rho0counts_tcut -> Fill((p4_rho0_kin).M(),p3_pmiss.Mag(),weight);
+    h_beamenergy_tcut->Fill(p4_beam_kin->E(),weight);
 
 /********************************************** Missed PID - Cut **********************************************/
 //if (v3_pip.Mag() > exp (-0.08* (180./M_PI*v3_pip.Theta()) +2.85) -0.1)
