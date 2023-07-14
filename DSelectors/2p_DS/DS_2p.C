@@ -77,8 +77,8 @@ void DS_2p::Init(TTree *locTree)
     ///MANUAL HISTOGRAMS:
         dHist_MissingMassSquared = new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}", 1000, -5, 5);
         dHist_MissingEnergy = new TH1I("MissingEnergy",";Missing Energy (GeV)", 1000, -1,3);
-        dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
-             
+        dHist_BeamEnergy = new TH1I("BeamEnergy", ";Beam Energy (GeV)", 100, 0.0, 12.0);
+        dHist_BeamEnergy_unweighted = new TH1I("BeamEnergy_unweighted", ";Beam Energy (GeV)", 100, 0.0, 12.0); 
         gDirectory->mkdir( "Combos & Event" )->cd();
         dHist_CombosperEvent_before = new TH1I("Combos per Event Before", "Combos per Event Before; Combos; Events", 10, -0.5, 9.5 );
         dHist_CombosperEvent_after = new TH1I("Combos per Event After", "Combos per Event After; Combos; Events", 10, -0.5, 9.5 );
@@ -97,7 +97,7 @@ void DS_2p::Init(TTree *locTree)
 
 	//CREATE ACCIDENTAL WEIGHT BRANCH
 	 dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("accidweight");
-    
+   	dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("RF_time"); 
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownBeam");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownPiPlus");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownPiMinus");
@@ -235,7 +235,9 @@ Bool_t DS_2p::Process(Long64_t locEntry)
 		if(locUsedSoFar_BeamEnergy.find(locBeamID) == locUsedSoFar_BeamEnergy.end())
 		{
 			//dHist_BeamEnergy->Fill(locBeamP4.E()); // Fills in-time and out-of-time beam photon combos
-			dHist_BeamEnergy->Fill(locBeamP4.E(),locHistAccidWeightFactor); // Alternate version with accidental subtraction
+			
+			dHist_BeamEnergy->Fill(locBeamP4.E(),locHistAccidWeightFactor);
+			dHist_BeamEnergy_unweighted->Fill(locBeamP4.E()); // Alternate version with accidental subtraction
 			locUsedSoFar_BeamEnergy.insert(locBeamID);
 		}
 
@@ -262,7 +264,7 @@ Bool_t DS_2p::Process(Long64_t locEntry)
 
 		//FILL ACCIDENTAL WEIGHT
 		dFlatTreeInterface->Fill_Fundamental<Double_t>("accidweight",locHistAccidWeightFactor);
-
+		dFlatTreeInterface->Fill_Fundamental<Double_t>("RF_time",locDeltaT_RF);
         NumberOfProtons.insert(locProton1TrackID+locProton2TrackID);
 		NumberOfPiPlus.insert(locPiPlusTrackID);
 		NumberOfPiMinus.insert(locPiMinusTrackID);
