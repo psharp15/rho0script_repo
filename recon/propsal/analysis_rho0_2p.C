@@ -222,6 +222,8 @@ if (!inputTree)
   /****** Rho0 Mass ******/
   TH1D *h_rho0counts_uncut = new TH1D("Rho0_Counts_uncut","Rho0Counts_before;Mass [GeV];Counts",90,0,3);
     hist_list.push_back(h_rho0counts_uncut);
+  TH1D *h_rho0counts_pre_prot_sorting = new TH1D("Rho0_Counts_PRE_prot_sorting","Rho0Counts_PRE_prot_sorting;Mass [GeV];Counts",90,0,5);
+    hist_list.push_back(h_rho0counts_pre_prot_sorting);
   TH1D *h_rho0counts_tcut = new TH1D("Rho0_Counts_tcut","Rho0Counts_tcut;Mass [GeV];Counts",90,0,5);
     hist_list.push_back(h_rho0counts_tcut);
     TH1D *h_rho0counts_eb = new TH1D("Rho0_Counts_eb","Rho0Counts_eb;Mass [GeV];Counts",90,0,5);
@@ -276,7 +278,7 @@ if (!inputTree)
 /********************************************** Event Loop **********************************************/
 for( int event=0; event < inputTree-> GetEntries(); event++){
 
-  if (event%100000==0)
+  if (event%10000==0)
   cerr << "Working on event " << event << "\n";
 
   inputTree-> GetEvent(event);
@@ -290,7 +292,32 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
   h_beamenergy_uncut_unweighted ->Fill(p4_beam_kin->E());
   h_beamenergy_uncut->Fill(p4_beam_kin->E(),weight);
 
+  /********************************************** Defining Variables **********************************************/
+
+    TLorentzVector p4_rho0_meas = (*p4_pip_meas)+(*p4_pim_meas);
+    TLorentzVector p4_rho0_kin = (*p4_pip_kin)+(*p4_pim_kin);
+    TLorentzVector p4_pmiss = (*p4_prot_lead_kin+(*p4_pip_kin + *p4_pim_kin) - *p4_beam_kin);
+    TVector3 p3_pmiss = p4_pmiss.Vect();
+    //TVector3 p3_pmiss = (p4_prot_lead_kin.Vect() + (p4_pip_kin->Vect() + p4_pim_kin->Vect()) - p4_beam_kin->Vect() ); //pmiss = lead + rho - beam
+    TLorentzVector p4_pmiss_thrown = (*p4_prot_lead_thrown + (*p4_pip_thrown + *p4_pim_thrown) - *p4_beam_thrown ); //pmiss = lead + rho - beam
+    TVector3 p3_pmiss_thrown = p4_pmiss_thrown.Vect();
+    TVector3 v3_prot_lead = p4_prot_lead_kin->Vect();
+    TVector3 v3_prot_lead_thrown = p4_prot_lead_thrown->Vect();
+    TVector3 beam_mom = p4_beam_meas->Vect();
+    TVector3 v3_pip = p4_pip_meas->Vect();
+    TVector3 v3_rho = p4_rho0_meas.Vect();
+
+    TLorentzVector p4_rho0_thrown =(*p4_pip_thrown)+(*p4_pim_thrown);
+    TVector3 v3_pip_thrown = p4_pip_thrown->Vect();
+
+    double t_mandel = (*p4_beam_kin - p4_rho0_kin).M2();
+    double s_mandel = (*p4_prot_lead_kin + p4_rho0_kin).M2();
+
+    TLorentzVector delta4mom = (*p4_pip_kin + *p4_pim_kin + *p4_prot1_kin + *p4_prot2_kin - TLorentzVector( 0,0,0,2*mN) - *p4_beam_kin);
+
+
 /********************************************** Sorting Protons **********************************************/
+h_rho0counts_pre_prot_sorting->Fill(p4_rho0_kin.M(),weight);
 
 const double pleadcutoff = 1;
 
@@ -321,30 +348,6 @@ const double pleadcutoff = 1;
 
   if (p4_prot_recoil_kin->P() < 0.3)
     continue;
-
-
-/********************************************** Defining Variables **********************************************/
-
-  TLorentzVector p4_rho0_meas = (*p4_pip_meas)+(*p4_pim_meas);
-  TLorentzVector p4_rho0_kin = (*p4_pip_kin)+(*p4_pim_kin);
-  TLorentzVector p4_pmiss = (*p4_prot_lead_kin+(*p4_pip_kin + *p4_pim_kin) - *p4_beam_kin);
-  TVector3 p3_pmiss = p4_pmiss.Vect();
-  //TVector3 p3_pmiss = (p4_prot_lead_kin.Vect() + (p4_pip_kin->Vect() + p4_pim_kin->Vect()) - p4_beam_kin->Vect() ); //pmiss = lead + rho - beam
-  TLorentzVector p4_pmiss_thrown = (*p4_prot_lead_thrown + (*p4_pip_thrown + *p4_pim_thrown) - *p4_beam_thrown ); //pmiss = lead + rho - beam
-  TVector3 p3_pmiss_thrown = p4_pmiss_thrown.Vect();
-  TVector3 v3_prot_lead = p4_prot_lead_kin->Vect();
-  TVector3 v3_prot_lead_thrown = p4_prot_lead_thrown->Vect();
-  TVector3 beam_mom = p4_beam_meas->Vect();
-  TVector3 v3_pip = p4_pip_meas->Vect();
-  TVector3 v3_rho = p4_rho0_meas.Vect();
-
-  TLorentzVector p4_rho0_thrown =(*p4_pip_thrown)+(*p4_pim_thrown);
-  TVector3 v3_pip_thrown = p4_pip_thrown->Vect();
-
-  double t_mandel = (*p4_beam_kin - p4_rho0_kin).M2();
-  double s_mandel = (*p4_prot_lead_kin + p4_rho0_kin).M2();
-
-  TLorentzVector delta4mom = (*p4_pip_kin + *p4_pim_kin + *p4_prot1_kin + *p4_prot2_kin - TLorentzVector( 0,0,0,2*mN) - *p4_beam_kin);
 
 /********************************************** Fill Uncut Histograms **********************************************/
   h_CL_cut->Fill(TMath::Prob(kin_chisq,kin_ndf),weight);
@@ -447,6 +450,7 @@ h_beamenergy_uncut_unweighted->Write();
 h_beamenergy_uncut->Write();
 
 fout->cd("UnCut");
+h_rho0counts_pre_prot_sorting->Write();
 h_pmiss_uncut->Write();
 h_pmiss_THROWN_uncut->Write();
 h_rho0counts_uncut->Write();
