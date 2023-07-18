@@ -378,7 +378,7 @@ const double pleadcutoff = 1;
   h_energy_balance->Fill(delta4mom.E(), weight);
 
 /********************************************** T - Cut **********************************************/
-if (-t_mandel < 1)
+if (-t_mandel < 1.5)
     continue;
 
 /********************************************** Fill T - Cut Histograms **********************************************/
@@ -390,10 +390,7 @@ if (-t_mandel < 1)
     h_pmiss_vs_rho0counts_tcut -> Fill((p4_rho0_kin).M(),p3_pmiss.Mag(),weight);
     h_beamenergy_tcut->Fill(p4_beam_kin->E(),weight);
 
-/********************************************** Missed PID - Cut **********************************************/
-//if (v3_pip.Mag() > exp (-0.08* (180./M_PI*v3_pip.Theta()) +2.85) -0.1)
-   // continue;
-   //
+
 /********************************************** Energy Balance - Cut **********************************************/
    if (delta4mom.E() < -3 || delta4mom.E() >3)
        continue;
