@@ -12,6 +12,16 @@ double rhoyield(TH1D* rhomass_hist)
     return integral - 0.5*(yright-yleft);
 }
 
+double rhoyield_anderror(TH1D* rhomass_hist, double &error)
+{
+    double yleft = rhomass_hist->GetBinContent(19);
+    double yright = rhomass_hist->GetBinContent(28);
+
+    double integral = rhomass_hist->Integral(19,28);
+    error = sqrt(integral);
+    return integral - 0.5*(yright-yleft);
+}
+
 void physics_rho0_2p(const char *inputfilename, const char *inputTreename, const char *outfilename, const char *outfileCSVname)
 {
   cerr << "Hello world\n";
@@ -55,8 +65,8 @@ void physics_rho0_2p(const char *inputfilename, const char *inputTreename, const
   TLorentzVector *p4_prot_lead_thrown=0;
   TLorentzVector *p4_prot_recoil_thrown=0;
 
-if (!inputTree)
-{cout<< "Couldn't get the inputTree. Check spelling"<<endl;}
+  if (!inputTree)
+      {cout<< "Couldn't get the inputTree. Check spelling"<<endl;}
 
   inputTree->SetBranchAddress("pip_p4_kin",&p4_pip_kin);
   inputTree->SetBranchAddress("pim_p4_kin",&p4_pim_kin);
@@ -82,6 +92,7 @@ if (!inputTree)
   TDirectory * dir_MisID = fout->mkdir("MisID-Cut");
   TDirectory * dir_Dalitz = fout->mkdir("Dalitz_1.3-Cut");
   TDirectory * dir_kmiss_TCut = fout->mkdir("KMiss_vs_t-distributions");
+  TDirectory * dir_pCMperp_TCut = fout->mkdir("pCMperp_vs_t-distributions");
 
   /****** Vert ******/
   TH1D *h_zprotleadvertex = new TH1D ("protLead Zvertex","protLead Zvertex;Vertex z [cm];Counts",50,0,100);
@@ -92,6 +103,11 @@ if (!inputTree)
   TH1D *h_rho0counts_zcut = new TH1D("Rho0_Counts_Zcut","Rho0Counts_ZCut;Mass [GeV];Counts",90,0,3);
   TH1D *h_rho0counts_misid = new TH1D("Rho0_Counts_MisId","Rho0Counts_ZCut;Mass [GeV];Counts",90,0,3);
   TH1D *h_rho0counts_lowerpcut = new TH1D("Rho0_Counts_LowerMomCut","Rho0Counts_lowerpcut;Mass [GeV];Counts",90,0,3);
+  TH1D *h_rho0counts_t_1_15 = new TH1D("Rho0_Counts_t_1_15","Rho0Counts_t_1_15;Mass [GeV];Counts",90,0,3);
+  TH1D *h_rho0counts_t_15_2 = new TH1D("Rho0_Counts_t_15_2","Rho0Counts_t_1_15;Mass [GeV];Counts",90,0,3);
+  TH1D *h_rho0counts_t_2_25 = new TH1D("Rho0_Counts_t_2_25","Rho0Counts_t_1_15;Mass [GeV];Counts",90,0,3);
+  TH1D *h_rho0counts_t_25_3 = new TH1D("Rho0_Counts_t_25_3","Rho0Counts_t_1_15;Mass [GeV];Counts",90,0,3);
+  TH1D *h_rho0counts_t_3_4 = new TH1D("Rho0_Counts_t_3_4","Rho0Counts_t_1_15;Mass [GeV];Counts",90,0,3);
 
   /****** Pi+ Mom vs Angle ******/
   TH2D *h_pip_p_theta_uncut = new TH2D ("pip_p_theta_uncut","Pip_PVSTheta_UNCUT ; theta [degree];p [GeV]; Counts",200,0,140,200,0,10);
@@ -117,13 +133,28 @@ if (!inputTree)
   TH2D *h_pippim_VS_pipprotL_lowerpcut = new TH2D ("h_pippim_VS_pipprotL_lowerpcut","PipProt Dalitz; Mom(pi+ & pi-);Mom(pip & prot);counts",100, 0, 3, 100, 0, 5);
   TH2D *h_pippim_VS_pimprotL_lowerpcut = new TH2D ("h_pippim_VS_pimprotL_lowerpcut","PimProt Dalitz; Mom(pi+ & pi-);Mom(pi- & prot);counts",100, 0, 3, 100, 0, 5);
 
-  /****** Money Plots ******/
-  TH1D *h_kmiss = new TH1D("KMiss","KMiss;KMiss[GeV];Counts",12,0.4,1);
-  TH2D *h_rho_vs_kmiss = new TH2D("h_rho_vs_kmiss", "h_rho_vs_kmiss;rho mass; kmiss; counts",90,0,3,6,0.4,1);
+  /****** Recoil Momentum ******/
   TH1D *h_precoil = new TH1D("P Recoil","Momentum of Recoil ;precoil[GeV];Counts",14,0.3,1);
   TH2D *h_rho_vs_precoil = new TH2D("h_rho_vs_precoil", "h_rho_vs_precoil;rho mass; precoil; counts",90,0,3,7,0.3,1);
 
+
+  /****** COM Motion  Plots ******/
+  TH1D *h_pCMperp = new TH1D("h_pCMperp","pCMperp;pCMperp[GeV];Counts",20,-1,1);
+  TH2D *h_rho_vs_pCMperp = new TH2D("h_rho_vs_pCMperp", "rho_vs_pCMperp;rho mass; pCMperp; counts",90,0,3,20,-0.5,0.5);
+  TH1D *h_pCMperp_1_15 = new TH1D("h_pCMperp_1_15","pCMperp 1_15;pCMperp[GeV];Counts",40,-1,1);
+  TH2D *h_rho_vs_pCMperp_1_15 = new TH2D("h_rho_vs_pCMperp_1_15", "rho_vs_pCMperp_1_15;rho mass; pCMperp; counts",90,0,3,40,-1,1);
+  TH1D *h_pCMperp_15_2 = new TH1D("h_pCMperp_15_2","pCMperp 15_2;pCMperp[GeV];Counts",40,-1,1);
+  TH2D *h_rho_vs_pCMperp_15_2 = new TH2D("h_rho_vs_pCMperp_15_2", "rho_vs_pCMperp_15_2;rho mass; pCMperp; counts",90,0,3,40,-1,1);
+  TH1D *h_pCMperp_2_25 = new TH1D("h_pCMperp_2_25","pCMperp 2_25;pCMperp[GeV];Counts",40,-1,1);
+  TH2D *h_rho_vs_pCMperp_2_25 = new TH2D("h_rho_vs_pCMperp_2_25", "rho_vs_pCMperp_2_25;rho mass; pCMperp; counts",90,0,3,40,-1,1);
+  TH1D *h_pCMperp_25_3 = new TH1D("h_pCMperp_25_3","pCMperp 25_3;pCMperp[GeV];Counts",40,-1,1);
+  TH2D *h_rho_vs_pCMperp_25_3 = new TH2D("h_rho_vs_pCMperp_25_3", "rho_vs_pCMperp_25_3;rho mass; pCMperp; counts",90,0,3,40,-1,1);
+  TH1D *h_pCMperp_3_4 = new TH1D("h_pCMperp_3_4","pCMperp 3_4;pCMperp[GeV];Counts",40,-1,1);
+  TH2D *h_rho_vs_pCMperp_3_4 = new TH2D("h_rho_vs_pCMperp_3_4", "rho_vs_pCMperp_3_4;rho mass; pCMperp; counts",90,0,3,40,-1,1);
+
   /*** KMISS t-Dist ***/
+  TH1D *h_kmiss = new TH1D("KMiss","KMiss;KMiss[GeV];Counts",12,0.4,1);
+  TH2D *h_rho_vs_kmiss = new TH2D("h_rho_vs_kmiss", "h_rho_vs_kmiss;rho mass; kmiss; counts",90,0,3,6,0.4,1);
   TH1D *h_kmiss_1_15 = new TH1D("KMiss1_15","KMiss1_15;KMiss[GeV];Counts",12,0.4,1);
   TH2D *h_rho_vs_kmiss_1_15 = new TH2D("h_rho_vs_kmiss_1_15", "h_rho_vs_kmiss_1_15;rho mass; kmiss; counts",90,0,3,6,0.4,1);
   TH1D *h_kmiss_15_2 = new TH1D("KMiss15_2","KMiss15_2;KMiss[GeV];Counts",12,0.4,1);
@@ -135,6 +166,11 @@ if (!inputTree)
   TH1D *h_kmiss_3_4 = new TH1D("KMiss3_4","KMiss3_4;KMiss[GeV];Counts",12,0.4,1);
   TH2D *h_rho_vs_kmiss_3_4 = new TH2D("h_rho_vs_kmiss_3_4", "h_rho_vs_kmiss_3_4;rho mass; kmiss; counts",90,0,3,6,0.4,1);
 
+  /*** Opening Angle ***/
+  TH1D *h_pairangle = new TH1D("h_pairangle","Pair Angle; angle; counts",90,-1,0);
+  h_pairangle->Sumw2();
+  TH2D *h_rho_vs_pairangle = new TH2D("h_rho_vs_pairangle", "h_rho_vs_pairangle;rho mass; pair angle [cos[angle]]; counts",90,0,3,90,-1,0);
+  h_rho_vs_pairangle->Sumw2();
 
 
 /********************************************** Event Loop **********************************************/
@@ -150,6 +186,7 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
     //cerr << "Defining variables " << "\n";
 
   TLorentzVector p4_rho0_kin = (*p4_pip_kin)+(*p4_pim_kin);
+  double Mpipi = p4_rho0_kin.M();
   TLorentzVector p4_pmiss = (*p4_prot_lead_kin+ p4_rho0_kin - *p4_beam_kin);
   TVector3 p3_pmiss = p4_pmiss.Vect();
   double pmiss = p3_pmiss.Mag();
@@ -176,6 +213,15 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
   double pmiss_minus = (p4_pmiss.E()-p4_pmiss.Z());
   double kmiss = (mN*sqrt((mN*mN + pmissT*pmissT)/(pmiss_minus*(2*mN-pmiss_minus)) - 1));
 
+  TLorentzVector p4_COM= p4_pmiss + *p4_prot_recoil_kin;
+  double pCMX = p4_COM.X(); //left in the hall
+  double pCMY = p4_COM.Y(); // up in the hall
+  TVector3 perphat = p4_beam_kin->Vect().Cross(p4_pmiss.Vect()).Unit(); //physics left and right // should be the same as X and Y in the hall vs gcf
+  double pCMperp = p4_COM.Vect().Dot(perphat);
+
+  if (p4_COM.Minus()/(2.4*mN) + 2./M_PI*v3_prot_lead.Theta() < 1.){
+      continue;
+  }
 
 /********************************************** Filling Un Cut Histograms **********************************************/
     //cerr << "Filling uncut hists " << "\n";
@@ -235,199 +281,295 @@ for( int event=0; event < inputTree-> GetEntries(); event++){
 
 
 /********************************************** Money Plots **********************************************/
+    //Abs t >1
     h_kmiss->Fill(kmiss,weight);
     h_rho_vs_kmiss->Fill(p4_rho0_kin.M(),kmiss,weight);
+
+    h_pCMperp->Fill(pCMperp,weight);
+    h_rho_vs_pCMperp->Fill(p4_rho0_kin.M(),pCMperp,weight);
+
+    double pairangle = p4_pmiss.Vect().Angle(v3_prot_recoil);
+
+
+    if (t_mandel > -1.5){
+        //h_kmiss_1_15->Fill(kmiss,weight);
+        //h_rho_vs_kmiss_1_15->Fill(p4_rho0_kin.M(),kmiss,weight);
+    continue;
+    }
+    if (kmiss>0.4){
+    if (TMath::Abs(Mpipi - 0.77)<0.13){
+    h_pairangle->Fill(TMath::Cos(pairangle),weight);
+    h_rho_vs_pairangle->Fill(p4_rho0_kin.M(),TMath::Cos(pairangle),weight);
+    h_rho_vs_pCMperp->Fill(p4_rho0_kin.M(),pCMperp,weight);
+    }
     h_precoil->Fill(v3_prot_recoil.Mag(),weight);
     h_rho_vs_precoil->Fill(p4_rho0_kin.M(),v3_prot_recoil.Mag(),weight);
-
-
-/********************************************** T-Cuts **********************************************/
-    if (t_mandel > -1.5){
-        continue;
     }
-    h_kmiss_1_15->Fill(kmiss,weight);
-    h_rho_vs_kmiss_1_15->Fill(p4_rho0_kin.M(),kmiss,weight);
+/********************************************** T-Cuts **********************************************/
+
+    if (kmiss>0.4){
+    if (TMath::Abs(Mpipi - 0.77)<0.13){
+    h_pCMperp_1_15->Fill(pCMperp,weight);
+    }
+    h_rho_vs_pCMperp_1_15->Fill(p4_rho0_kin.M(),pCMperp,weight);
+    }
+    h_rho0counts_t_1_15->Fill(p4_rho0_kin.M(),weight);
 
     if (t_mandel > -2){
+        h_kmiss_15_2->Fill(kmiss,weight);
+        h_rho_vs_kmiss_15_2->Fill(p4_rho0_kin.M(),kmiss,weight);
+        if (kmiss>0.4){
+        if (TMath::Abs(Mpipi - 0.77)<0.13){
+        h_pCMperp_15_2->Fill(pCMperp,weight);
+        }
+        h_rho_vs_pCMperp_15_2->Fill(p4_rho0_kin.M(),pCMperp,weight);
+        }
+        h_rho0counts_t_15_2->Fill(p4_rho0_kin.M(),weight);
         continue;
     }
-    h_kmiss_15_2->Fill(kmiss,weight);
-    h_rho_vs_kmiss_15_2->Fill(p4_rho0_kin.M(),kmiss,weight);
 
     if (t_mandel > -2.5){
+        h_kmiss_2_25->Fill(kmiss,weight);
+        h_rho_vs_kmiss_2_25->Fill(p4_rho0_kin.M(),kmiss,weight);
+
+        if (kmiss>0.4){
+        if (TMath::Abs(Mpipi - 0.77)<0.13){
+        h_pCMperp_2_25->Fill(pCMperp,weight);
+        }
+        h_rho_vs_pCMperp_2_25->Fill(p4_rho0_kin.M(),pCMperp,weight);
+        }
+        h_rho0counts_t_2_25->Fill(p4_rho0_kin.M(),weight);
+
         continue;
     }
-    h_kmiss_2_25->Fill(kmiss,weight);
-    h_rho_vs_kmiss_2_25->Fill(p4_rho0_kin.M(),kmiss,weight);
 
     if (t_mandel > -3){
+        h_kmiss_25_3->Fill(kmiss,weight);
+        h_rho_vs_kmiss_25_3->Fill(p4_rho0_kin.M(),kmiss,weight);
+
+        if (kmiss>0.4){
+        if (TMath::Abs(Mpipi - 0.77)<0.13){
+        h_pCMperp_25_3->Fill(pCMperp,weight);
+        }
+        h_rho_vs_pCMperp_25_3->Fill(p4_rho0_kin.M(),pCMperp,weight);
+        }
+        h_rho0counts_t_25_3->Fill(p4_rho0_kin.M(),weight);
         continue;
     }
-    h_kmiss_25_3->Fill(kmiss,weight);
-    h_rho_vs_kmiss_25_3->Fill(p4_rho0_kin.M(),kmiss,weight);
+
+
 
     if (t_mandel > -4){
+        h_kmiss_3_4->Fill(kmiss,weight);
+        h_rho_vs_kmiss_3_4->Fill(p4_rho0_kin.M(),kmiss,weight);
+
+        if (kmiss>0.4){
+        if (TMath::Abs(Mpipi - 0.77)<0.13){
+        h_pCMperp_3_4->Fill(pCMperp,weight);
+         }
+        h_rho_vs_pCMperp_3_4->Fill(p4_rho0_kin.M(),pCMperp,weight);
+        }
+        h_rho0counts_t_3_4->Fill(p4_rho0_kin.M(),weight);
         continue;
     }
-    h_kmiss_3_4->Fill(kmiss,weight);
-    h_rho_vs_kmiss_3_4->Fill(p4_rho0_kin.M(),kmiss,weight);
 
-}
+
+    }
 cerr << "closing inputfile" << "\n";
 
 inputFile->Close();
 
 /********************************************** Count the Rho0s **********************************************/
 
-    // precoil
-    cout << "#Yield vs P_recoil\n"
-        << "#[left edge] [bin center] [right edge] [yield] \n";
 
-    for (int i=1; i<= 7; i++){
-        cout << h_rho_vs_precoil->GetYaxis()->GetBinLowEdge(i)<< " " <<
-         h_rho_vs_precoil->GetYaxis()->GetBinCenter(i)<< " " <<
-         h_rho_vs_precoil->GetYaxis()->GetBinUpEdge(i)<< " ";
-
-
-         char temp[50];
-
-    //projections
-        sprintf(temp,"prec_bin%d",i);
-        TH1D* thismass_spectrum = h_rho_vs_precoil->ProjectionX(temp,i,i);
-        double yield = rhoyield(thismass_spectrum);
-        cout << yield << endl;
-
-
-    }
     ofstream rho0outputfile(outfileCSVname);
     //kmiss
     cout << "#Yield vs Kmiss\n"
-        << "#[left edge] [bin center] [right edge] [yield] \n";
-        rho0outputfile <<"Total Yield vs Kmiss\n";
-    for (int i=1; i<= 6; i++){
+        << "#[left edge] [bin center] [right edge] [uncertainty] [yield] \n";
+        rho0outputfile <<"#Total Yield vs Kmiss\n"<< "#[left edge] , #[bin center] , #[right edge] ,#[uncertainty] ,#[yield] \n";
+        for (int i=1; i<= 6; i++){
         cout << h_rho_vs_kmiss->GetYaxis()->GetBinLowEdge(i)<< " " <<
          h_rho_vs_kmiss->GetYaxis()->GetBinCenter(i)<< " " <<
-         h_rho_vs_kmiss->GetYaxis()->GetBinUpEdge(i)<< " ";
-
-
+         h_rho_vs_kmiss->GetYaxis()->GetBinUpEdge(i)<< " "<<
+         h_rho_vs_kmiss->GetBinError(i)<< " ";
          char temp[50];
-
     //projections
         sprintf(temp,"kmiss_bin%d",i);
         TH1D* thismass_spectrum = h_rho_vs_kmiss->ProjectionX(temp,i,i);
-        double yield = rhoyield(thismass_spectrum);
+        double error;
+        double yield = rhoyield_anderror(thismass_spectrum,error);
         cout << yield << endl;
-        rho0outputfile<< h_rho_vs_kmiss->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<endl;
-    }
-
+        rho0outputfile<< h_rho_vs_kmiss->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<"," << error <<endl;
+        }
+/*         //kmiss h_rho_vs_kmiss_1_15
+        cout << "#Yield vs h_rho_vs_kmiss_1_15\n"
+            << "#[left edge] [bin center] [right edge] [uncertainty] [yield] \n";
+            //rho0outputfile <<"1 to 1.5 Yield vs Kmiss\n"<< "[left edge] " <<","<< "[bin center] " <<","<< "[right edge] " <<","<< "[uncertainty] " <<","<< "[yield] \n";
+            for (int i=1; i<= 6; i++){
+            cout << h_rho_vs_kmiss_1_15->GetYaxis()->GetBinLowEdge(i)<< " " <<
+             h_rho_vs_kmiss_1_15->GetYaxis()->GetBinCenter(i)<< " " <<
+             h_rho_vs_kmiss_1_15->GetYaxis()->GetBinUpEdge(i)<< " "<<
+             h_rho_vs_kmiss_1_15->GetBinError(i)<< " ";
+             char temp[50];
+        //projections
+            sprintf(temp,"kmiss_bin%d",i);
+            TH1D* thismass_spectrum = h_rho_vs_kmiss_1_15->ProjectionX(temp,i,i);
+            double error;
+            double yield = rhoyield_anderror(thismass_spectrum,error);
+            cout << yield << endl;
+            rho0outputfile<< h_rho_vs_kmiss_1_15->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_1_15->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_1_15->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<"," << error <<endl;
+            }
      //kmiss-> 1 to 1.5
      cout << "#1 to 1.5 Yield vs Kmiss\n"
-          << "#[left edge] [bin center] [right edge] [yield] \n";
-          rho0outputfile <<"1 to 1.5 Yield vs Kmiss\n";
+          << "#[left edge] [bin center] [right edge] [uncertainty] [yield] \n";
+          rho0outputfile <<"1 to 1.5 Yield vs Kmiss\n"<< "[left edge] " <<","<< "[bin center] " <<","<< "[right edge] " <<","<< "[uncertainty] " <<","<< "[yield] \n";
       for (int i=1; i<= 6; i++){
          cout << h_rho_vs_kmiss_1_15->GetYaxis()->GetBinLowEdge(i)<< " " <<
            h_rho_vs_kmiss_1_15->GetYaxis()->GetBinCenter(i)<< " " <<
-         h_rho_vs_kmiss_1_15->GetYaxis()->GetBinUpEdge(i)<< " ";
-
-
+           h_rho_vs_kmiss_1_15->GetYaxis()->GetBinUpEdge(i)<< " "<<
+           h_rho_vs_kmiss_1_15->GetBinError(i)<< " ";
           char temp[50];
-
      //projections
          sprintf(temp,"kmiss_bin%d",i);
          TH1D* thismass_spectrum = h_rho_vs_kmiss_1_15->ProjectionX(temp,i,i);
-           double yield = rhoyield(thismass_spectrum);
+           double error;
+           double yield = rhoyield_anderror(thismass_spectrum,error);
           cout << yield << endl;
-          rho0outputfile<< h_rho_vs_kmiss_1_15->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_1_15->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_1_15->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<endl;
-
-      }
-    //kmiss-> 1.5 to 2
+          rho0outputfile<< h_rho_vs_kmiss_1_15->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_1_15->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_1_15->GetYaxis()->GetBinUpEdge(i)<< ","<< yield <<"," << error <<endl;
+      }*/
+ /*   //kmiss-> 1.5 to 2
           cout << "#1.5 to 2 Yield vs Kmiss\n"
-               << "#[left edge] [bin center] [right edge] [yield] \n";
-               rho0outputfile <<"1.5 to 2 Yield vs Kmiss\n";
+               << "#[left edge] [bin center] [right edge] [uncertainty] [yield] \n";
+               //rho0outputfile <<"1.5 to 2 Yield vs Kmiss\n"<<  "[left edge] " <<","<< "[bin center] " <<","<< "[right edge] " <<","<< "[uncertainty] " <<","<< "[yield] \n";
            for (int i=1; i<= 6; i++){
               cout << h_rho_vs_kmiss_15_2->GetYaxis()->GetBinLowEdge(i)<< " " <<
                 h_rho_vs_kmiss_15_2->GetYaxis()->GetBinCenter(i)<< " " <<
-              h_rho_vs_kmiss_15_2->GetYaxis()->GetBinUpEdge(i)<< " ";
-
-
+                h_rho_vs_kmiss_15_2->GetYaxis()->GetBinUpEdge(i)<< " " <<
+                h_rho_vs_kmiss_15_2->GetYaxis()->GetBinUpEdge(i)<< " "<<
+                h_rho_vs_kmiss_15_2->GetBinError(i)<< " ";
                char temp[50];
-
           //projections
               sprintf(temp,"kmiss_bin%d",i);
               TH1D* thismass_spectrum = h_rho_vs_kmiss_15_2->ProjectionX(temp,i,i);
                 double yield = rhoyield(thismass_spectrum);
                cout << yield << endl;
-               rho0outputfile<< h_rho_vs_kmiss_15_2->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_15_2->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_15_2->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<endl;
+               rho0outputfile<< h_rho_vs_kmiss_15_2->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_15_2->GetYaxis()->GetBinCenter(i)<<"," << h_rho_vs_kmiss_15_2->GetYaxis()->GetBinUpEdge(i)<< ","<<h_rho_vs_kmiss_15_2->GetBinError(i)<<","<< yield <<endl;
            }
     //kmiss-> 2 to 2.5
          cout << "#2 to 2.5 Yield vs Kmiss\n"
-            << "#[left edge] [bin center] [right edge] [yield] \n";
-            rho0outputfile <<"2 to 2.5 Yield vs Kmiss\n";
+            << "#[left edge] [bin center] [right edge] [uncertainty] [yield] \n";
+            //rho0outputfile <<"2 to 2.5 Yield vs Kmiss\n"<<  "[left edge] " <<","<< "[bin center] " <<","<< "[right edge] " <<","<< "[uncertainty] " <<","<< "[yield] \n";
         for (int i=1; i<= 6; i++){
                 cout << h_rho_vs_kmiss_2_25->GetYaxis()->GetBinLowEdge(i)<< " " <<
                 h_rho_vs_kmiss_2_25->GetYaxis()->GetBinCenter(i)<< " " <<
-                h_rho_vs_kmiss_2_25->GetYaxis()->GetBinUpEdge(i)<< " ";
-
-
+                h_rho_vs_kmiss_2_25->GetYaxis()->GetBinUpEdge(i)<< " " <<
+                h_rho_vs_kmiss_2_25->GetBinError(i)<< " ";
          char temp[50];
-
          //projections
              sprintf(temp,"kmiss_bin%d",i);
              TH1D* thismass_spectrum = h_rho_vs_kmiss_2_25->ProjectionX(temp,i,i);
              double yield = rhoyield(thismass_spectrum);
             cout << yield << endl;
-             rho0outputfile<< h_rho_vs_kmiss_2_25->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_2_25->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_2_25->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<endl;
+             rho0outputfile<< h_rho_vs_kmiss_2_25->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_2_25->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_2_25->GetYaxis()->GetBinUpEdge(i)<< "," << h_rho_vs_kmiss_2_25->GetBinError(i)<<","<< yield <<endl;
         }
 
     //kmiss-> 2.5 to 3
           cout << "#2.5 to 3 Yield vs Kmiss\n"
-          << "#[left edge] [bin center] [right edge] [yield] \n";
-          rho0outputfile <<"2.5 to 3 Yield vs Kmiss\n";
+          << "#[left edge] [bin center] [right edge] [uncertainty] [yield] \n";
+          //rho0outputfile <<"2.5 to 3 Yield vs Kmiss\n" << "[left edge] " <<","<< "[bin center] " <<","<< "[right edge] " <<","<< "[uncertainty] " <<","<< "[yield] \n";
              for (int i=1; i<= 6; i++){
                cout << h_rho_vs_kmiss_25_3->GetYaxis()->GetBinLowEdge(i)<< " " <<
                 h_rho_vs_kmiss_25_3->GetYaxis()->GetBinCenter(i)<< " " <<
-                 h_rho_vs_kmiss_25_3->GetYaxis()->GetBinUpEdge(i)<< " ";
-
-
+                 h_rho_vs_kmiss_25_3->GetYaxis()->GetBinUpEdge(i)<< " "<<
+                  h_rho_vs_kmiss_25_3->GetBinError(i)<< " ";
            char temp[50];
-
            //projections
            sprintf(temp,"kmiss_bin%d",i);
              TH1D* thismass_spectrum = h_rho_vs_kmiss_25_3->ProjectionX(temp,i,i);
              double yield = rhoyield(thismass_spectrum);
               cout << yield << endl;
 
-               rho0outputfile<< h_rho_vs_kmiss_25_3->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_25_3->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_25_3->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<endl;
+               rho0outputfile<< h_rho_vs_kmiss_25_3->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_25_3->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_25_3->GetYaxis()->GetBinUpEdge(i)<<","<< h_rho_vs_kmiss_25_3->GetBinError(i)<<"," << yield <<endl;
              }
 
     //kmiss-> 3 to 4
       cout << "#3 to 4 Yield vs Kmiss\n"
-      << "#[left edge] [bin center] [right edge] [yield] \n";
-      rho0outputfile << "#3 to 4 Yield vs Kmiss\n";
+      << "#[left edge] [bin center] [right edge] [uncertainty] [yield] \n";
+      //rho0outputfile << "#3 to 4 Yield vs Kmiss\n"<< "[left edge] " <<","<< "[bin center] " <<","<< "[right edge] " <<","<< "[uncertainty] " <<","<< "[yield] \n";
        for (int i=1; i<= 6; i++){
        cout << h_rho_vs_kmiss_3_4->GetYaxis()->GetBinLowEdge(i)<< " " <<
        h_rho_vs_kmiss_3_4->GetYaxis()->GetBinCenter(i)<< " " <<
-       h_rho_vs_kmiss_3_4->GetYaxis()->GetBinUpEdge(i)<< " ";
-
-
-      char temp[50];
-
+       h_rho_vs_kmiss_3_4->GetYaxis()->GetBinUpEdge(i)<< " "<<
+       h_rho_vs_kmiss_3_4->GetBinError(i) << " ";
+       char temp[50];
       //projections
         sprintf(temp,"kmiss_bin%d",i);
         TH1D* thismass_spectrum = h_rho_vs_kmiss_3_4->ProjectionX(temp,i,i);
         double yield = rhoyield(thismass_spectrum);
         cout << yield << endl;
+        rho0outputfile<< h_rho_vs_kmiss_3_4->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_3_4->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_3_4->GetYaxis()->GetBinUpEdge(i)<<","<< h_rho_vs_kmiss_3_4->GetBinError(i) << "," << yield <<endl;
+       }
+*/
+    //pair angle
+       cout << "#Yield vs Pair Angle\n"
+           << "#[left edge] [bin center] [right edge] [uncertainty] [yield] \n";
+        rho0outputfile <<"#Total Yield vs Pair Angle\n"<< "#[left edge] ,#[bin center] ,#[right edge]  ,#[yield],#[uncertainty]  \n";
+       for (int i=1; i<= h_pairangle->GetNbinsX(); i++){
+           cout << h_pairangle->GetBinLowEdge(i)<< " " <<
+            h_pairangle->GetBinCenter(i)<< " " <<
+            h_pairangle->GetXaxis()->GetBinUpEdge(i)<< " " <<
+            h_pairangle->GetBinContent(i)<< " " <<
+            h_pairangle->GetBinError(i)<< " \n";
 
-        rho0outputfile<< h_rho_vs_kmiss_3_4->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_3_4->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_3_4->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<endl;
+           rho0outputfile<< h_pairangle->GetBinLowEdge(i)<< "," <<
+            h_pairangle->GetBinCenter(i)<< "," <<
+            h_pairangle->GetXaxis()->GetBinUpEdge(i)<< "," <<
+            h_pairangle->GetBinContent(i)<< "," <<
+            h_pairangle->GetBinError(i)<< "\n";
     }
-
-		/*rho0outputfile << "KMIss for 3<t<4 \n";
-		for (int i=1; i<=6; i++)
-		{
-				rho0outputfile<< h_rho_vs_kmiss_3_4->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_kmiss_3_4->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_kmiss_3_4->GetYaxis()->GetBinUpEdge(i)<<endl;
-		}*/
+    // precoil
+       cout << "#Yield vs P_recoil kmiss > 0.4 and |t|>1.5\n"
+           << "#[left edge] [bin center] [right edge]  [uncertainty]  [yield] \n";
+           rho0outputfile <<"#Total Yield vs P_recoil, kmiss > 0.4 and |t|>1.5\n"<< "#[left edge] ,#[bin center] ,#[right edge] ,#[yield],#[uncertainty]  \n";
+       for (int i=1; i<= 7; i++){
+           cout << h_rho_vs_precoil->GetYaxis()->GetBinLowEdge(i)<< " " <<
+            h_rho_vs_precoil->GetYaxis()->GetBinCenter(i)<< " " <<
+            h_rho_vs_precoil->GetYaxis()->GetBinUpEdge(i)<< " " <<
+            h_rho_vs_precoil->GetBinError(i)<< " ";
+            char temp[50];
+       //projections
+           sprintf(temp,"prec_bin%d",i);
+           TH1D* thismass_spectrum = h_rho_vs_precoil->ProjectionX(temp,i,i);
+           double error;
+           double yield = rhoyield_anderror(thismass_spectrum,error);
+           cout << yield << endl;
+           rho0outputfile<< h_rho_vs_precoil->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_precoil->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_precoil->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<"," << error <<endl;
+    }
+       // pCMperp
+       cout << "#Yield vs pCMperp kmiss > 0.4 and |t|>1.5\n"
+           << "#[left edge] [bin center] [right edge]  [uncertainty]  [yield] \n";
+           rho0outputfile <<"#Total Yield vs pCMperp, kmiss > 0.4 and |t|>1.5\n"<< "#[left edge] ,#[bin center] ,#[right edge] ,#[yield], #[uncertainty] \n";
+       for (int i=1; i<= h_pCMperp->GetNbinsX(); i++){
+           cout << h_rho_vs_pCMperp->GetYaxis()->GetBinLowEdge(i)<< " " <<
+            h_rho_vs_pCMperp->GetYaxis()->GetBinCenter(i)<< " " <<
+            h_rho_vs_pCMperp->GetYaxis()->GetBinUpEdge(i)<< " " <<
+            h_rho_vs_pCMperp->GetBinError(i)<< " ";
+            char temp[50];
+       //projections
+           sprintf(temp,"ppCMperpn%d",i);
+           TH1D* thismass_spectrum = h_rho_vs_pCMperp->ProjectionX(temp,i,i);
+           double error;
+           double yield = rhoyield_anderror(thismass_spectrum,error);
+           cout << yield << endl;
+           rho0outputfile<< h_rho_vs_pCMperp->GetYaxis()->GetBinLowEdge(i)<<","<<h_rho_vs_pCMperp->GetYaxis()->GetBinCenter(i)<<","<<h_rho_vs_pCMperp->GetYaxis()->GetBinUpEdge(i)<<","<< yield <<"," << error <<endl;
+       }
 		rho0outputfile.close();
 
+/***************************************** FIT COM MOTION THING **********************************************/
+    h_pCMperp_1_15->Fit("gaus");
+    TF1 *fitresult=h_pCMperp_1_15->GetFunction("gaus");
+    double sigmaCMperp_1_15 = fitresult->GetParameter(2); //0 indexing
+    cout << sigmaCMperp_1_15 <<endl;
 
 /********************************************** WRITE OUT HISTOGRAMS **********************************************/
 
@@ -436,6 +578,8 @@ fout->cd();
 
 h_precoil->Write();
 h_rho_vs_precoil->Write();
+h_pairangle->Write();
+h_rho_vs_pairangle->Write();
 
 fout->cd("UnCut");
 h_rho0counts_uncut->Write();
@@ -447,6 +591,7 @@ h_protR_p_theta_uncut->Write();
 h_pippim_VS_pipprotL->Write();
 h_pippim_VS_pimprotL->Write();
 h_pipprot_VS_pimprotL->Write();
+
 fout->cd("ZVert-Cut");
 h_zprotleadvertex_zcut->Write();
 h_rho0counts_zcut->Write();
@@ -462,10 +607,24 @@ h_rho0counts_lowerpcut->Write();
 h_pippim_VS_pipprotL_lowerpcut->Write();
 h_pippim_VS_pimprotL_lowerpcut->Write();
 
+fout->cd("pCMperp_vs_t-distributions");
+h_pCMperp->Write();
+h_rho_vs_pCMperp->Write();
+h_pCMperp_1_15->Write();
+h_rho_vs_pCMperp_1_15->Write();
+h_pCMperp_15_2->Write();
+h_rho_vs_pCMperp_15_2->Write();
+h_pCMperp_2_25->Write();
+h_rho_vs_pCMperp_2_25->Write();
+h_pCMperp_25_3->Write();
+h_rho_vs_pCMperp_25_3->Write();
+h_pCMperp_3_4->Write();
+h_rho_vs_pCMperp_3_4->Write();
+
 fout->cd("KMiss_vs_t-distributions");
 h_kmiss->Write();
 h_rho_vs_kmiss->Write();
-h_kmiss_1_15->Write();
+/*h_kmiss_1_15->Write();
 h_rho_vs_kmiss_1_15->Write();
 h_kmiss_15_2->Write();
 h_rho_vs_kmiss_15_2->Write();
@@ -473,8 +632,13 @@ h_kmiss_2_25->Write();
 h_rho_vs_kmiss_2_25->Write();
 h_kmiss_25_3->Write();
 h_rho_vs_kmiss_25_3->Write();
-h_kmiss_3_4->Write();
+h_kmiss_3_4->Write();*/
 h_rho_vs_kmiss_3_4->Write();
+h_rho0counts_t_1_15->Write();
+h_rho0counts_t_15_2->Write();
+h_rho0counts_t_2_25->Write();
+h_rho0counts_t_25_3->Write();
+h_rho0counts_t_3_4->Write();
 fout->Close();
 
 
