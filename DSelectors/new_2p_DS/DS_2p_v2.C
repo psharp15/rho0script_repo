@@ -136,6 +136,9 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
     set<Int_t> NumberOfPiMinus;
     set<Int_t> NumberOfBeam;
 
+
+   	int NumComboSurvived_after = 0;
+	int NumComboSurvived_weighted = 0;
 	//LOOP OVER COMBOS
 	for(UInt_t loc_i = 0; loc_i < Get_NumCombos(); ++loc_i)
 	{
@@ -308,7 +311,7 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 	return kTRUE;
 }
 
-void DS_2p_V2::Finalize(void)
+void DS_2p_v2::Finalize(void)
 {
 	//CALL THIS LAST
 	DSelector::Finalize(); //Saves results to the output file
