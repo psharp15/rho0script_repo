@@ -53,7 +53,7 @@ private:
 
 void DS_2p_v2::Get_ComboWrappers(void) {
   // Step 0
-  dStep0Wrapper = dComboWrapper->Get_ParticleComboStep(0s);
+  dStep0Wrapper = dComboWrapper->Get_ParticleComboStep(0);
   dComboBeamWrapper =
       static_cast<DBeamParticle *>(dStep0Wrapper->Get_InitialParticle());
   dPiPlusWrapper = static_cast<DChargedTrackHypothesis *>(
