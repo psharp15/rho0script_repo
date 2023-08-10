@@ -87,7 +87,7 @@ void DS_2p_v2::Init(TTree *locTree)
 	//OUTPUT BRACHES
 	dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("accidweight");
    	dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("RF_time");
-    dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("beam_p4_meas");
+  /*  dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("beam_p4_meas");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("pim_p4_meas");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("pip_p4_meas");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("p1_p4_meas");
@@ -97,7 +97,7 @@ void DS_2p_v2::Init(TTree *locTree)
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("pim_p4_kin");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("pip_p4_kin");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("p1_p4_kin");
-    dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("p2_p4_kin");
+    dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("p2_p4_kin");*/
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("miss_p4_kin");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownBeam");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownPiMinus");
