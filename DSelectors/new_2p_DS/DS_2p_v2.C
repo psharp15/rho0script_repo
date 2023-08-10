@@ -165,6 +165,77 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 		TLorentzVector locProton1P4_Measured = dProton1Wrapper->Get_P4_Measured();
 		TLorentzVector locProton2P4_Measured = dProton2Wrapper->Get_P4_Measured();
 
+		//GET COMBO RF TIMING INFO
+		TLorentzVector    locBeamX4_Measured = dComboBeamWrapper->Get_X4_Measured();
+		Double_t          locBunchPeriod = dAnalysisUtilities.Get_BeamBunchPeriod(Get_RunNumber());
+		Double_t          locDeltaT_RF = dAnalysisUtilities.Get_DeltaT_RF(Get_RunNumber(), locBeamX4_Measured, dComboWrapper);
+		Int_t             locRelBeamBucket = dAnalysisUtilities.Get_RelativeBeamBucket(Get_RunNumber(), locBeamX4_Measured, dComboWrapper); // 0 for in-time events, non-zero integer for out-of-time photons
+		Int_t             locNumOutOfTimeBunchesInTree = 4; //YOU need to specify this number (on a single side, so that total number out-of-time bunches accepted is 2 times this number for left + right bunches)
+		Bool_t            locSkipNearestOutOfTimeBunch = true; // True: skip events from nearest out-of-time bunch on either side (recommended).
+		Int_t             locNumOutOfTimeBunchesToUse = locSkipNearestOutOfTimeBunch ? locNumOutOfTimeBunchesInTree-1:locNumOutOfTimeBunchesInTree;
+		Double_t          locAccidentalScalingFactor = dAnalysisUtilities.Get_AccidentalScalingFactor(Get_RunNumber(), locBeamP4.E(), dIsMC); // Ideal value would be 1, but deviations require added factor, which is different for data and MC.
+		Double_t          locAccidentalScalingFactorError = dAnalysisUtilities.Get_AccidentalScalingFactorError(Get_RunNumber(), locBeamP4.E()); // Ideal value would be 1, but deviations observed, need added factor.
+		Double_t          locHistAccidWeightFactor = locRelBeamBucket==0 ? 1 : -locAccidentalScalingFactor/(2*locNumOutOfTimeBunchesToUse) ; // Weight by 1 for in-time events, ScalingFactor*(1/NBunches) for out-of-time
+		if(locSkipNearestOutOfTimeBunch && abs(locRelBeamBucket)==1) {
+		 	dComboWrapper->Set_IsComboCut(true);
+		 	continue;
+		 }    // Skip nearest out-of-time bunch: tails of in-time distribution also leak in
+
+
+		// Combine 4-vectors
+		TLorentzVector locMissingP4_Measured = locBeamP4_Measured + dTargetP4;
+		locMissingP4_Measured -= locPiPlusP4_Measured + locPiMinusP4_Measured + locProton1P4_Measured + locProton2P4_Measured;
+
+		/******************************************** EXECUTE ANALYSIS ACTIONS *******************************************/
+
+		// Loop through the analysis actions, executing them in order for the active particle combo
+		dAnalyzeCutActions->Perform_Action(); // Must be executed before Execute_Actions()
+		if(!Execute_Actions()) //if the active combo fails a cut, IsComboCutFlag automatically set
+			continue;
+
+		//BEAM ENERGY
+		if(locUsedSoFar_BeamEnergy.find(locBeamID) == locUsedSoFar_BeamEnergy.end())
+		{
+			//dHist_BeamEnergy->Fill(locBeamP4.E()); // Fills in-time and out-of-time beam photon combos
+			dHist_BeamEnergy->Fill(locBeamP4.E(),locHistAccidWeightFactor); // Alternate version with accidental subtraction
+			locUsedSoFar_BeamEnergy.insert(locBeamID);
+		}
+
+		//MISSING MASS SQUARED
+
+		//Missing Mass Squared
+		double locMissingMassSquared = locMissingP4_Measured.M2();
+
+		map<Particle_t, set<Int_t> > locUsedThisCombo_MissingMass;
+		locUsedThisCombo_MissingMass[Unknown].insert(locBeamID); //beam
+		locUsedThisCombo_MissingMass[PiPlus].insert(locPiPlusTrackID);
+		locUsedThisCombo_MissingMass[PiMinus].insert(locPiMinusTrackID);
+		locUsedThisCombo_MissingMass[Proton].insert(locProton1TrackID);
+		locUsedThisCombo_MissingMass[Proton].insert(locProton2TrackID);
+
+		//compare to what's been used so far
+		if(locUsedSoFar_MissingMass.find(locUsedThisCombo_MissingMass) == locUsedSoFar_MissingMass.end())
+		{
+			//unique missing mass combo: histogram it, and register this combo of particles
+			//dHist_MissingMassSquared->Fill(locMissingMassSquared); // Fills in-time and out-of-time beam photon combos
+			dHist_MissingMassSquared->Fill(locMissingMassSquared,locHistAccidWeightFactor); // Alternate version with accidental subtraction
+			locUsedSoFar_MissingMass.insert(locUsedThisCombo_MissingMass);
+		}
+
+		//FILL ACCIDENTAL WEIGHT
+		dFlatTreeInterface->Fill_Fundamental<Double_t>("accidweight",locHistAccidWeightFactor);
+		dFlatTreeInterface->Fill_Fundamental<Double_t>("RF_time",locDeltaT_RF);
+        NumberOfProtons.insert(locProton1TrackID+locProton2TrackID);
+		NumberOfPiPlus.insert(locPiPlusTrackID);
+		NumberOfPiMinus.insert(locPiMinusTrackID);
+		NumberOfBeam.insert(locBeamID);
+
+		TLorentzVector locMyThrownBeam(0.,0.,0.,0.);
+		TLorentzVector locMyThrownPiPlus(0.,0.,0.,0.);
+		TLorentzVector locMyThrownPiMinus(0.,0.,0.,0.);
+		TLorentzVector locMyThrownProton1(0.,0.,0.,0.);
+		TLorentzVector locMyThrownProton2(0.,0.,0.,0.);
+
 		// GET THROWN P4
         TLorentzVector locBeamP4_Thrown, locPiMinusP4_Thrown, locMissingP4_Thrown;
         if(dThrownBeam != NULL)
@@ -214,66 +285,6 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 		dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownProton1", locMyThrownProton1);
 		dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownProton2", locMyThrownProton2);
 
-		//GET COMBO RF TIMING INFO
-		TLorentzVector    locBeamX4_Measured = dComboBeamWrapper->Get_X4_Measured();
-		Double_t          locBunchPeriod = dAnalysisUtilities.Get_BeamBunchPeriod(Get_RunNumber());
-		Double_t          locDeltaT_RF = dAnalysisUtilities.Get_DeltaT_RF(Get_RunNumber(), locBeamX4_Measured, dComboWrapper);
-		Int_t             locRelBeamBucket = dAnalysisUtilities.Get_RelativeBeamBucket(Get_RunNumber(), locBeamX4_Measured, dComboWrapper); // 0 for in-time events, non-zero integer for out-of-time photons
-		Int_t             locNumOutOfTimeBunchesInTree = 4; //YOU need to specify this number (on a single side, so that total number out-of-time bunches accepted is 2 times this number for left + right bunches)
-		Bool_t            locSkipNearestOutOfTimeBunch = true; // True: skip events from nearest out-of-time bunch on either side (recommended).
-		Int_t             locNumOutOfTimeBunchesToUse = locSkipNearestOutOfTimeBunch ? locNumOutOfTimeBunchesInTree-1:locNumOutOfTimeBunchesInTree;
-		Double_t          locAccidentalScalingFactor = dAnalysisUtilities.Get_AccidentalScalingFactor(Get_RunNumber(), locBeamP4.E(), dIsMC); // Ideal value would be 1, but deviations require added factor, which is different for data and MC.
-		Double_t          locAccidentalScalingFactorError = dAnalysisUtilities.Get_AccidentalScalingFactorError(Get_RunNumber(), locBeamP4.E()); // Ideal value would be 1, but deviations observed, need added factor.
-		Double_t          locHistAccidWeightFactor = locRelBeamBucket==0 ? 1 : -locAccidentalScalingFactor/(2*locNumOutOfTimeBunchesToUse) ; // Weight by 1 for in-time events, ScalingFactor*(1/NBunches) for out-of-time
-		if(locSkipNearestOutOfTimeBunch && abs(locRelBeamBucket)==1) {
-		 	dComboWrapper->Set_IsComboCut(true);
-		 	continue;
-		 }    // Skip nearest out-of-time bunch: tails of in-time distribution also leak in
-
-
-		// Combine 4-vectors
-		TLorentzVector locMissingP4_Measured = locBeamP4_Measured + dTargetP4;
-		locMissingP4_Measured -= locPiPlusP4_Measured + locPiMinusP4_Measured + locProton1P4_Measured + locProton2P4_Measured;
-
-		/******************************************** EXECUTE ANALYSIS ACTIONS *******************************************/
-
-		// Loop through the analysis actions, executing them in order for the active particle combo
-		dAnalyzeCutActions->Perform_Action(); // Must be executed before Execute_Actions()
-		if(!Execute_Actions()) //if the active combo fails a cut, IsComboCutFlag automatically set
-			continue;
-
-		//BEAM ENERGY
-		if(locUsedSoFar_BeamEnergy.find(locBeamID) == locUsedSoFar_BeamEnergy.end())
-		{
-			//dHist_BeamEnergy->Fill(locBeamP4.E()); // Fills in-time and out-of-time beam photon combos
-			dHist_BeamEnergy->Fill(locBeamP4.E(),locHistAccidWeightFactor); // Alternate version with accidental subtraction
-			locUsedSoFar_BeamEnergy.insert(locBeamID);
-		}
-
-		//MISSING MASS SQUARED
-
-		//Missing Mass Squared
-		double locMissingMassSquared = locMissingP4_Measured.M2();
-
-		//Uniqueness tracking: Build the map of particles used for the missing mass
-			//For beam: Don't want to group with final-state photons. Instead use "Unknown" PID (not ideal, but it's easy).
-
-		map<Particle_t, set<Int_t> > locUsedThisCombo_MissingMass;
-		locUsedThisCombo_MissingMass[Unknown].insert(locBeamID); //beam
-		locUsedThisCombo_MissingMass[PiPlus].insert(locPiPlusTrackID);
-		locUsedThisCombo_MissingMass[PiMinus].insert(locPiMinusTrackID);
-		locUsedThisCombo_MissingMass[Proton].insert(locProton1TrackID);
-		locUsedThisCombo_MissingMass[Proton].insert(locProton2TrackID);
-
-		//compare to what's been used so far
-		if(locUsedSoFar_MissingMass.find(locUsedThisCombo_MissingMass) == locUsedSoFar_MissingMass.end())
-		{
-			//unique missing mass combo: histogram it, and register this combo of particles
-			//dHist_MissingMassSquared->Fill(locMissingMassSquared); // Fills in-time and out-of-time beam photon combos
-			dHist_MissingMassSquared->Fill(locMissingMassSquared,locHistAccidWeightFactor); // Alternate version with accidental subtraction
-			locUsedSoFar_MissingMass.insert(locUsedThisCombo_MissingMass);
-		}
-
 		//FILL FLAT TREE
 		Fill_FlatTree(); //for the active combo
 		//end of combo loop
@@ -297,7 +308,7 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 	return kTRUE;
 }
 
-void DS_2P_V2::Finalize(void)
+void DS_2p_V2::Finalize(void)
 {
 	//CALL THIS LAST
 	DSelector::Finalize(); //Saves results to the output file
