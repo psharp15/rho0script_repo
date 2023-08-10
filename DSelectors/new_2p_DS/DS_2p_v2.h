@@ -47,6 +47,16 @@ private:
   // EXAMPLES:
   TH1I *dHist_MissingMassSquared;
   TH1I *dHist_BeamEnergy;
+  TH1I *dHist_MissingEnergy;
+
+  TH1F *dHist_RFTiming;
+  TH1D *dHist_ProtonNumber;
+  TH1D *dHist_PipNumber;
+  TH1D *dHist_PimNumber;
+  TH1D *dHist_BeamNumber;
+
+  TH1I *dHist_CombosperEvent_before;
+  TH1I *dHist_CombosperEvent_after;
 
   ClassDef(DS_2p_v2, 0);
 };
