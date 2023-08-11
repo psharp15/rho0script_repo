@@ -3,7 +3,6 @@
 void DS_2p_v2::Init(TTree *locTree)
 {
 
-    cerr << "I'm in the init! /n";
 	//SET OUTPUT FILE NAME
 	dOutputFileName        = ""; //"" for none
 	dOutputTreeFileName    = ""; //"" for none
@@ -107,12 +106,11 @@ void DS_2p_v2::Init(TTree *locTree)
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownProton1");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownProton2");
 
-    cerr << "I'm out of the the init! On to process/n";
 }
 
 Bool_t DS_2p_v2::Process(Long64_t locEntry)
 {
-    cerr << "I'm in process with locEntry value:" << locEntry << "\n";
+   cerr << "I'm in process with locEntry value: " << locEntry << "\n";
 	//CALL THIS FIRST
 	DSelector::Process(locEntry); //Gets the data from the tree for the entry
 	//cout << "RUN " << Get_RunNumber() << ", EVENT " << Get_EventNumber() << endl;
@@ -146,7 +144,8 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 	//LOOP OVER COMBOS
 	for(UInt_t loc_i = 0; loc_i < Get_NumCombos(); ++loc_i)
 	{
-		//INITIALIZE THE COMBO
+	c  err << "I'm in the combo loop!I'm combo # " << loc_i << "\n";
+	   //INITIALIZE THE COMBO
 	   dComboWrapper->Set_ComboIndex(loc_i);
 		if(dComboWrapper->Get_IsComboCut())    // check whether the combo has been cut
 		continue;                          // combo has been cut previously
