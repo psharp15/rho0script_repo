@@ -1,9 +1,9 @@
-#include "DS_2p_v2.h"
+#include "DS_1p_v2.h"
 
-void DS_2p_v2::Init(TTree *locTree)
+void DS_1p_v2::Init(TTree *locTree)
 {
 
-    //cerr << "I'm in the init! /n";
+    //cerr << "I'm in the init! \n";
 	//SET OUTPUT FILE NAME
 	dOutputFileName        = ""; //"" for none
 	dOutputTreeFileName    = ""; //"" for none
@@ -20,8 +20,7 @@ void DS_2p_v2::Init(TTree *locTree)
 	Get_ComboWrappers();
 	dPreviousRunNumber = 0;
 
-	// MC INFORMATION
-	dIsMC = (dTreeInterface->Get_Branch("MCWeight") != NULL);
+
 
 	//INITIALIZATION: ANALYSIS ACTIONS
 	std::deque<Particle_t> MyRho;
@@ -104,15 +103,16 @@ void DS_2p_v2::Init(TTree *locTree)
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownBeam");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownPiMinus");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownPiPlus");
-    dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownProton1");
-    dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownProton2");
+    dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownProton");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("thrownMissing");
 
-
-    //cerr << "I'm out of the the init! On to process/n";
+    //cerr << "I'm out of the the init! On to process \n";
+    
+    	// MC INFORMATION
+	dIsMC = (dTreeInterface->Get_Branch("MCWeight") != NULL);
 }
 
-Bool_t DS_2p_v2::Process(Long64_t locEntry)
+Bool_t DS_1p_v2::Process(Long64_t locEntry)
 {
     //cerr << "I'm in process with locEntry value: " << locEntry << "\n";
 	//CALL THIS FIRST
@@ -148,7 +148,7 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 	//LOOP OVER COMBOS
 	for(UInt_t loc_i = 0; loc_i < Get_NumCombos(); ++loc_i)
 	{
-        cerr << "I'm in locEntry: " << locEntry << " with this combo: " <<loc_i << endl;
+        //cerr << "I'm in locEntry: " << locEntry << " with this combo: " <<loc_i << endl;
         //INITIALIZE THE COMBO
 	   dComboWrapper->Set_ComboIndex(loc_i);
 		if(dComboWrapper->Get_IsComboCut())    // check whether the combo has been cut
@@ -158,23 +158,22 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 		Int_t locBeamID = dComboBeamWrapper->Get_BeamID();
 		Int_t locPiPlusTrackID = dPiPlusWrapper->Get_TrackID();
 		Int_t locPiMinusTrackID = dPiMinusWrapper->Get_TrackID();
-		Int_t locProton1TrackID = dProton1Wrapper->Get_TrackID();
-		Int_t locProton2TrackID = dProton2Wrapper->Get_TrackID();
+		Int_t locProtonTrackID = dProtonWrapper->Get_TrackID();
 
 		//GET Kin Fit P4's'
 		TLorentzVector locBeamP4 = dComboBeamWrapper->Get_P4();
 		TLorentzVector locPiPlusP4 = dPiPlusWrapper->Get_P4();
 		TLorentzVector locPiMinusP4 = dPiMinusWrapper->Get_P4();
-		TLorentzVector locProton1P4 = dProton1Wrapper->Get_P4();
-		TLorentzVector locProton2P4 = dProton2Wrapper->Get_P4();
+		TLorentzVector locProtonP4 = dProtonWrapper->Get_P4();
 
 		// Get Measured P4's:
 		TLorentzVector locBeamP4_Measured = dComboBeamWrapper->Get_P4_Measured();
 		TLorentzVector locPiPlusP4_Measured = dPiPlusWrapper->Get_P4_Measured();
 		TLorentzVector locPiMinusP4_Measured = dPiMinusWrapper->Get_P4_Measured();
-		TLorentzVector locProton1P4_Measured = dProton1Wrapper->Get_P4_Measured();
-		TLorentzVector locProton2P4_Measured = dProton2Wrapper->Get_P4_Measured();
+		TLorentzVector locProtonP4_Measured = dProtonWrapper->Get_P4_Measured();
 
+        //cerr << "About to get to timing info \n";
+        
 		//GET COMBO RF TIMING INFO
 		TLorentzVector    locBeamX4_Measured = dComboBeamWrapper->Get_X4_Measured();
 		Double_t          locBunchPeriod = dAnalysisUtilities.Get_BeamBunchPeriod(Get_RunNumber());
@@ -192,9 +191,10 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 		 }    // Skip nearest out-of-time bunch: tails of in-time distribution also leak in
 
 
+        //cerr << "Survived Timing info. finishing analysis actions \n";
 		// Combine 4-vectors
 		TLorentzVector locMissingP4_Measured = locBeamP4_Measured + dTargetP4;
-		locMissingP4_Measured -= locPiPlusP4_Measured + locPiMinusP4_Measured + locProton1P4_Measured + locProton2P4_Measured;
+		locMissingP4_Measured -= locPiPlusP4_Measured + locPiMinusP4_Measured + locProtonP4_Measured;
 
 		/******************************************** EXECUTE ANALYSIS ACTIONS *******************************************/
 
@@ -202,6 +202,8 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 		dAnalyzeCutActions->Perform_Action(); // Must be executed before Execute_Actions()
 		if(!Execute_Actions()) //if the active combo fails a cut, IsComboCutFlag automatically set
 			continue;
+        
+        //cerr << "Survived Cut actions. On to combos! \n";
 
 		//BEAM ENERGY
 		if(locUsedSoFar_BeamEnergy.find(locBeamID) == locUsedSoFar_BeamEnergy.end())
@@ -220,8 +222,7 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 		locUsedThisCombo_MissingMass[Unknown].insert(locBeamID); //beam
 		locUsedThisCombo_MissingMass[PiPlus].insert(locPiPlusTrackID);
 		locUsedThisCombo_MissingMass[PiMinus].insert(locPiMinusTrackID);
-		locUsedThisCombo_MissingMass[Proton].insert(locProton1TrackID);
-		locUsedThisCombo_MissingMass[Proton].insert(locProton2TrackID);
+		locUsedThisCombo_MissingMass[Proton].insert(locProtonTrackID);
 
 		//compare to what's been used so far
 		if(locUsedSoFar_MissingMass.find(locUsedThisCombo_MissingMass) == locUsedSoFar_MissingMass.end())
@@ -231,11 +232,13 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 			dHist_MissingMassSquared->Fill(locMissingMassSquared,locHistAccidWeightFactor); // Alternate version with accidental subtraction
 			locUsedSoFar_MissingMass.insert(locUsedThisCombo_MissingMass);
 		}
+        
+        //cerr << "at the filling accidental weight check point. \n";
 
 		//FILL ACCIDENTAL WEIGHT
 		dFlatTreeInterface->Fill_Fundamental<Double_t>("accidweight",locHistAccidWeightFactor);
 		dFlatTreeInterface->Fill_Fundamental<Double_t>("RF_time",locDeltaT_RF);
-        NumberOfProtons.insert(locProton1TrackID+locProton2TrackID);
+        NumberOfProtons.insert(locProtonTrackID);
 		NumberOfPiPlus.insert(locPiPlusTrackID);
 		NumberOfPiMinus.insert(locPiMinusTrackID);
 		NumberOfBeam.insert(locBeamID);
@@ -243,8 +246,7 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 		TLorentzVector locMyThrownBeam(0.,0.,0.,0.);
 		TLorentzVector locMyThrownPiPlus(0.,0.,0.,0.);
 		TLorentzVector locMyThrownPiMinus(0.,0.,0.,0.);
-		TLorentzVector locMyThrownProton1(0.,0.,0.,0.);
-		TLorentzVector locMyThrownProton2(0.,0.,0.,0.);
+		TLorentzVector locMyThrownProton(0.,0.,0.,0.);
 
         //cerr << "I'm establishing the thrown particles\n ";
 
@@ -254,81 +256,63 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
         if(dThrownBeam != NULL)
             locBeamP4_Thrown = dThrownBeam->Get_P4();
             //Loop over throwns
-            //bool firstProton = true;
         
         
             for(UInt_t loc_i = 0; loc_i < Get_NumThrown(); ++loc_i)
             {
-             cerr << "I'm running through thrown particles " << loc_i <<"\n ";
+             //cerr << "I'm running through thrown particles " << loc_i <<"\n ";
             
                 dThrownWrapper->Set_ArrayIndex(loc_i);
 
-             cout << "Before the switch " << dThrownWrapper->Get_PID() << endl;   
+             //cout << "Before the switch " << dThrownWrapper->Get_PID() << endl;   
              
                 switch(dThrownWrapper->Get_PID())
 		      {
-               cout << "I'm in the switch " << dThrownWrapper->Get_PID() <<"\n ";
+               //cout << "I'm in the switch " << dThrownWrapper->Get_PID() <<"\n ";
 
 		      case PiPlus:
 								locMyThrownPiPlus = dThrownWrapper->Get_P4();
-                                cerr << "I'm the pi + \n";
+                                //cerr << "I'm the pi + \n";
 								break;
 		      case PiMinus:
 								locMyThrownPiMinus = dThrownWrapper->Get_P4();
-                                cerr << "I'm the pi - \n";
+                                //cerr << "I'm the pi - \n";
 								break;
 		      case Proton:
-								if (locMyThrownProton1.T() == 0)
-						          {
-									locMyThrownProton2 = dThrownWrapper->Get_P4();
-									//firstProton = false;
-									}
-									else
-									{
-									locMyThrownProton1 = dThrownWrapper->Get_P4();
-									}
-									break;
+								locMyThrownProton = dThrownWrapper->Get_P4();
+                                //cerr << "I'm the PROTON \n";
+								break;
 		      default:
-								cerr<< "default swtich \n";
+								//cerr<< "default swtich \n";
                                     break;
 		      }
                     
-                cerr << "made it through the switch  " << loc_i <<"\n ";
+                //cerr << "made it through the switch  " << loc_i <<"\n ";
             }
-        cerr << "made it through the thrown loop  \n";
+        //cerr << "made it through the thrown loop  \n";
 
-		/*if (locMyThrownProton1.T() < locMyThrownProton2.T())
-		  {
-            cerr << "sorting protons  " << loc_i <<"\n ";
-		    TLorentzVector tmp = locMyThrownProton1;
-		    locMyThrownProton1 = locMyThrownProton2;
-		    locMyThrownProton2 = tmp;
-             cerr << "sorting protons  " << tmp.T() <<"\n ";
-
-				}*/
-        locMissingP4_Thrown = locMyThrownPiPlus + locMyThrownPiMinus + locMyThrownProton2+ locMyThrownProton1 - locBeamP4_Thrown; 
-        cerr << "the missing p4 is: "<<locMissingP4_Thrown.P() << "  \n";
+        locMissingP4_Thrown = locMyThrownPiPlus + locMyThrownPiMinus + locMyThrownProton - locBeamP4_Thrown; 
+        //cerr << "the missing p4 is: "<<locMissingP4_Thrown.P() << "  \n";
 
         //FILL THROWN FLAT TREE BRANCHES
         dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownBeam", locBeamP4_Thrown);
 		dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownPiPlus", locMyThrownPiPlus);
 		dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownPiMinus", locMyThrownPiMinus);
-		dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownProton1", locMyThrownProton1);
-		dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownProton2", locMyThrownProton2); 
+		dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownProton", locMyThrownProton);
         dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownMissing", locMissingP4_Thrown);
         
-        cerr << "filled some trees with thrown info  \n";
+        //cerr << "filled some trees with thrown info  \n";
 		//FILL FLAT TREE
 		Fill_FlatTree(); //for the active combo
 		//end of combo loop
-        cerr << "Filling flat tree! \n";
+        //cerr << "Filling flat tree! \n";
 
 		if(!dComboWrapper->Get_IsComboCut())
             NumComboSurvived_weighted += locHistAccidWeightFactor;
 			NumComboSurvived_after += 1;
             dHist_RFTiming->Fill(locDeltaT_RF);
         
-        cerr << "Combo hists work..? \n";
+        //cerr << "Combo hists work..? \n";
 		}
 
 	//FILL HISTOGRAMS: Num combos / events surviving actions
@@ -342,10 +326,10 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry)
 	dHist_BeamNumber->Fill( NumberOfBeam.size() );*/
 
 	return kTRUE;
-    cerr << "Leaving the Process \n";
+    //cerr << "Leaving the Process \n";
 }
 
-void DS_2p_v2::Finalize(void)
+void DS_1p_v2::Finalize(void)
 {
 	//CALL THIS LAST
 	DSelector::Finalize(); //Saves results to the output file

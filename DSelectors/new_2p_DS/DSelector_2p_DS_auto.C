@@ -1,6 +1,6 @@
-#include "DSelector_2p_DS_test.h"
+#include "DSelector_2p_DS_auto.h"
 
-void DSelector_2p_DS_test::Init(TTree *locTree)
+void DSelector_2p_DS_auto::Init(TTree *locTree)
 {
 	// USERS: IN THIS FUNCTION, ONLY MODIFY SECTIONS WITH A "USER" OR "EXAMPLE" LABEL. LEAVE THE REST ALONE.
 
@@ -9,7 +9,7 @@ void DSelector_2p_DS_test::Init(TTree *locTree)
 	// Init() will be called many times when running on PROOF (once per file to be processed).
 
 	//USERS: SET OUTPUT FILE NAME //can be overriden by user in PROOF
-	dOutputFileName = "2p_DS_test.root"; //"" for none
+	dOutputFileName = "2p_DS_auto.root"; //"" for none
 	dOutputTreeFileName = ""; //"" for none
 	dFlatTreeFileName = ""; //output flat tree (one combo per tree entry), "" for none
 	dFlatTreeName = ""; //if blank, default name will be chosen
@@ -130,7 +130,7 @@ void DSelector_2p_DS_test::Init(TTree *locTree)
 
 }
 
-Bool_t DSelector_2p_DS_test::Process(Long64_t locEntry)
+Bool_t DSelector_2p_DS_auto::Process(Long64_t locEntry)
 {
 	// The Process() function is called for each entry in the tree. The entry argument
 	// specifies which entry in the currently loaded tree is to be processed.
@@ -421,7 +421,7 @@ Bool_t DSelector_2p_DS_test::Process(Long64_t locEntry)
 	return kTRUE;
 }
 
-void DSelector_2p_DS_test::Finalize(void)
+void DSelector_2p_DS_auto::Finalize(void)
 {
 	//Save anything to output here that you do not want to be in the default DSelector output ROOT file.
 
