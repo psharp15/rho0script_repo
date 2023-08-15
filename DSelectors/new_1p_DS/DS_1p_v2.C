@@ -61,7 +61,7 @@ void DS_1p_v2::Init(TTree *locTree)
         dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper, true));
 
         // ANALYZE CUT ACTIONS
-        dAnalyzeCutActions = new DHistogramAction_AnalyzeCutActions( dAnalysisActions, dComboWrapper, false, 0, MyRho, 1000, 0.9, 2.4, "CutActionEffect" );
+        dAnalyzeCutActions = new DHistogramAction_AnalyzeCutActions( dAnalysisActions, dComboWrapper, false, 0, MyRho, 1000, 0, 3, "CutActionEffect" );
 
 	//INITIALIZE ACTIONS
 	Initialize_Actions();
