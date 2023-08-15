@@ -1,4 +1,4 @@
-#include "DS_2p_v2.h"
+#include "DS_2p_v2_fixed.h"
 
 void DS_2p_v2_fixed::Init(TTree *locTree) {
   // cerr << "I'm in the init! /n";
@@ -74,7 +74,7 @@ void DS_2p_v2_fixed::Init(TTree *locTree) {
 
   // ANALYZE CUT ACTIONS
   dAnalyzeCutActions = new DHistogramAction_AnalyzeCutActions(
-      dAnalysisActions, dComboWrapper, false, 0, MyRho, 1000, 0.9, 2.4,
+      dAnalysisActions, dComboWrapper, false, 0, MyRho, 1000, 0, 3,
       "CutActionEffect");
 
   // INITIALIZE ACTIONS
@@ -326,22 +326,22 @@ Bool_t DS_2p_v2_fixed::Process(Long64_t locEntry) {
     // bool firstProton = true;
 
     for (UInt_t loc_i = 0; loc_i < Get_NumThrown(); ++loc_i) {
-      cerr << "I'm running through thrown particles " << loc_i << "\n ";
+      //cerr << "I'm running through thrown particles " << loc_i << "\n ";
 
       dThrownWrapper->Set_ArrayIndex(loc_i);
 
-      cout << "Before the switch " << dThrownWrapper->Get_PID() << endl;
+      //cout << "Before the switch " << dThrownWrapper->Get_PID() << endl;
 
       switch (dThrownWrapper->Get_PID()) {
-        cout << "I'm in the switch " << dThrownWrapper->Get_PID() << "\n ";
+        //cout << "I'm in the switch " << dThrownWrapper->Get_PID() << "\n ";
 
       case PiPlus:
         locMyThrownPiPlus = dThrownWrapper->Get_P4();
-        cerr << "I'm the pi + \n";
+        //cerr << "I'm the pi + \n";
         break;
       case PiMinus:
         locMyThrownPiMinus = dThrownWrapper->Get_P4();
-        cerr << "I'm the pi - \n";
+        //cerr << "I'm the pi - \n";
         break;
       case Proton:
         if (locMyThrownProton1.T() == 0) {
@@ -352,13 +352,13 @@ Bool_t DS_2p_v2_fixed::Process(Long64_t locEntry) {
         }
         break;
       default:
-        cerr << "default swtich \n";
+        //cerr << "default swtich \n";
         break;
       }
 
-      cerr << "made it through the switch  " << loc_i << "\n ";
+     // cerr << "made it through the switch  " << loc_i << "\n ";
     }
-    cerr << "made it through the thrown loop  \n";
+   // cerr << "made it through the thrown loop  \n";
 
     /*if (locMyThrownProton1.T() < locMyThrownProton2.T())
       {
@@ -372,7 +372,7 @@ cerr << "sorting protons  " << loc_i <<"\n ";
     locMissingP4_Thrown = locMyThrownPiPlus + locMyThrownPiMinus +
                           locMyThrownProton2 + locMyThrownProton1 -
                           locBeamP4_Thrown;
-    cerr << "the missing p4 is: " << locMissingP4_Thrown.P() << "  \n";
+    //cerr << "the missing p4 is: " << locMissingP4_Thrown.P() << "  \n";
 
     // FILL THROWN FLAT TREE BRANCHES
     dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownBeam",
@@ -388,18 +388,18 @@ cerr << "sorting protons  " << loc_i <<"\n ";
     dFlatTreeInterface->Fill_TObject<TLorentzVector>("thrownMissing",
                                                      locMissingP4_Thrown);
 
-    cerr << "filled some trees with thrown info  \n";
+    //cerr << "filled some trees with thrown info  \n";
     // FILL FLAT TREE
     Fill_FlatTree(); // for the active combo
     // end of combo loop
-    cerr << "Filling flat tree! \n";
+    //cerr << "Filling flat tree! \n";
 
     if (!dComboWrapper->Get_IsComboCut())
       NumComboSurvived_weighted += locHistAccidWeightFactor;
     NumComboSurvived_after += 1;
     dHist_RFTiming->Fill(locDeltaT_RF);
 
-    cerr << "Combo hists work..? \n";
+    //cerr << "Combo hists work..? \n";
   }
 
   // FILL HISTOGRAMS: Num combos / events surviving actions
@@ -413,7 +413,7 @@ dHist_ProtonNumber->Fill( NumberOfProtons.size() );
   dHist_BeamNumber->Fill( NumberOfBeam.size() );*/
 
   return kTRUE;
-  cerr << "Leaving the Process \n";
+  //cerr << "Leaving the Process \n";
 }
 
 void DS_2p_v2_fixed::Finalize(void) {
