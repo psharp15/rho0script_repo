@@ -1,119 +1,106 @@
 #include "DS_2p_v2.h"
 
 void DS_2p_v2::Init(TTree *locTree) {
-  // cerr << "I'm in the init! /n";
-  // SET OUTPUT FILE NAME
-  dOutputFileName = "";     //"" for none
-  dOutputTreeFileName = ""; //"" for none
-  dFlatTreeFileName =
-      "output.root"; // output flat tree (one combo per tree entry), "" for none
-  dFlatTreeName = ""; // if blank, default name will be chosen
-  dSaveDefaultFlatBranches =
-      true; // False: don't save default branches, reduce disk footprint.
+    // cerr << "I'm in the init! /n";
+      // SET OUTPUT FILE NAME
+      dOutputFileName = "";     //"" for none
+      dOutputTreeFileName = ""; //"" for none
+      dFlatTreeFileName = "output.root"; // output flat tree (one combo per tree entry), "" for none
+      dFlatTreeName = ""; // if blank, default name will be chosen
+      dSaveDefaultFlatBranches = true; // False: don't save default branches, reduce disk footprint.
 
-  // INITIALIZE THE TREE INTERFACE AND WRAPPERS
-  bool locInitializedPriorFlag =
-      dInitializedFlag;     // save whether have been initialized previously
-  DSelector::Init(locTree); // Called to initialize wrappers for each new TTree
-  if (locInitializedPriorFlag)
-    return; // have already created histograms, etc. below: exit
+      // INITIALIZE THE TREE INTERFACE AND WRAPPERS
+      bool locInitializedPriorFlag = dInitializedFlag;     // save whether have been initialized previously
+      DSelector::Init(locTree); // Called to initialize wrappers for each new TTree
+      if (locInitializedPriorFlag)
+        return; // have already created histograms, etc. below: exit
 
-  Get_ComboWrappers();
-  dPreviousRunNumber = 0;
+      Get_ComboWrappers();
+      dPreviousRunNumber = 0;
 
-  // MC INFORMATION
-  dIsMC = (dTreeInterface->Get_Branch("MCWeight") != NULL);
+      // MC INFORMATION
+      dIsMC = (dTreeInterface->Get_Branch("MCWeight") != NULL);
 
-  // INITIALIZATION: ANALYSIS ACTIONS
-  std::deque<Particle_t> MyRho;
-  MyRho.push_back(PiPlus);
-  MyRho.push_back(PiMinus);
+      // INITIALIZATION: ANALYSIS ACTIONS
+      std::deque<Particle_t> MyRho;
+      MyRho.push_back(PiPlus); MyRho.push_back(PiMinus);
 
-  // ANALYSIS ACTIONS: //Executed in order if added to dAnalysisActions
-  // false/true below: use measured/kinfit data
+      // ANALYSIS ACTIONS: //Executed in order if added to dAnalysisActions
+      // false/true below: use measured/kinfit data
 
-  // PID
-  dAnalysisActions.push_back(
-      new DHistogramAction_ParticleID(dComboWrapper, false));
-  // below: value: +/- N ns, Unknown: All PIDs, SYS_NULL: all timing systems
-  // dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false,
-  // 0.5, KPlus, SYS_BCAL));
+      // PID
+      dAnalysisActions.push_back(new DHistogramAction_ParticleID(dComboWrapper, false));
+      // below: value: +/- N ns, Unknown: All PIDs, SYS_NULL: all timing systems
+      // dAnalysisActions.push_back(new DCutAction_PIDDeltaT(dComboWrapper, false,
+      // 0.5, KPlus, SYS_BCAL));
 
-  // UNUSED TRACKS AND SHOWERS
-  dAnalysisActions.push_back(
-      new DCutAction_NumUnusedTracks(dComboWrapper, 0, ""));
-  // CUT: 0 unused tracks
-  // dAnalysisActions.push_back(new
-  // DCutAction_Energy_UnusedShowers(dComboWrapper, 0, ""));
-  dAnalysisActions.push_back(
-      new DCutAction_NumUnusedShowers(dComboWrapper, 0, ""));
-  // CUT: 0 unused showers
+      // UNUSED TRACKS AND SHOWERS
+      dAnalysisActions.push_back(new DCutAction_NumUnusedTracks(dComboWrapper, 0, ""));
+        // CUT: 0 unused tracks
+      // dAnalysisActions.push_back(new DCutAction_Energy_UnusedShowers(dComboWrapper, 0, ""));
+      dAnalysisActions.push_back(new DCutAction_NumUnusedShowers(dComboWrapper, 0, ""));
+      // CUT: 0 unused showers
 
-  // PIDFOM (for charged tracks)
-  dAnalysisActions.push_back(new DHistogramAction_PIDFOM(dComboWrapper));
-  // dAnalysisActions.push_back(new DCutAction_PIDFOM(dComboWrapper, KPlus,
-  // 0.1));
-  dAnalysisActions.push_back(new DCutAction_EachPIDFOM(dComboWrapper, 0.1));
-  // CUT: CL of each PID based on the FOM is 0.1
+      // PIDFOM (for charged tracks)
+      dAnalysisActions.push_back(new DHistogramAction_PIDFOM(dComboWrapper));
+      // dAnalysisActions.push_back(new DCutAction_PIDFOM(dComboWrapper, KPlus, 0.1));
+      dAnalysisActions.push_back(new DCutAction_EachPIDFOM(dComboWrapper, 0.1));
+      // CUT: CL of each PID based on the FOM is 0.1
 
-  // KINFIT RESULTS
-  dAnalysisActions.push_back(new DHistogramAction_KinFitResults(dComboWrapper));
-  dAnalysisActions.push_back(new DCutAction_KinFitFOM(dComboWrapper, 0.01, ""));
-  // CUT: CL of the Kin Fit based on the FOM is 0.01
+      // KINFIT RESULTS
+      dAnalysisActions.push_back(new DHistogramAction_KinFitResults(dComboWrapper));
+      dAnalysisActions.push_back(new DCutAction_KinFitFOM(dComboWrapper, 0.01, ""));
+      // CUT: CL of the Kin Fit based on the FOM is 0.01
 
-  // BEAM ENERGY
-  dAnalysisActions.push_back(
-      new DHistogramAction_BeamEnergy(dComboWrapper, true));
-  dAnalysisActions.push_back(
-      new DCutAction_BeamEnergy(dComboWrapper, true, 6, 10.8));
-  // CUT: Beam Energy between 6 and 10.8 GeV
+      // BEAM ENERGY
+      dAnalysisActions.push_back(new DHistogramAction_BeamEnergy(dComboWrapper, true));
+      dAnalysisActions.push_back(new DCutAction_BeamEnergy(dComboWrapper, true, 6, 10.8));
+      // CUT: Beam Energy between 6 and 10.8 GeV
 
-  // KINEMATICS
-  dAnalysisActions.push_back(
-      new DHistogramAction_ParticleComboKinematics(dComboWrapper, true));
+      // KINEMATICS
+      dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper, true));
 
-  // ANALYZE CUT ACTIONS
-  dAnalyzeCutActions = new DHistogramAction_AnalyzeCutActions(
-      dAnalysisActions, dComboWrapper, false, 0, MyRho, 1000, 0, 3,
-      "CutActionEffect");
+      // ANALYZE CUT ACTIONS
+      dAnalyzeCutActions = new DHistogramAction_AnalyzeCutActions(dAnalysisActions, dComboWrapper, false, 
+                                                                  0, MyRho, 1000, 0, 3, "CutActionEffect");
 
-  // INITIALIZE ACTIONS
-  Initialize_Actions();
-  dAnalyzeCutActions->Initialize(); // manual action, must call Initialize()
+      // INITIALIZE ACTIONS
+      Initialize_Actions();
+      dAnalyzeCutActions->Initialize(); // manual action, must call Initialize()
 
-  // MANUAL HISTOGRAMS:
-  gDirectory->mkdir("Combos & Event")->cd();
-  dHist_CombosperEvent_before =
-      new TH1I("Combos per Event Before",
+      // MANUAL HISTOGRAMS:
+      gDirectory->mkdir("Combos & Event")->cd();
+      dHist_CombosperEvent_before =
+          new TH1I("Combos per Event Before",
                "Combos per Event Before; Combos; Events", 10, -0.5, 9.5);
-  dHist_CombosperEvent_after =
-      new TH1I("Combos per Event After",
+      dHist_CombosperEvent_after =
+          new TH1I("Combos per Event After",
                "Combos per Event After; Combos; Events", 10, -0.5, 9.5);
-  gDirectory->cd("..");
+      gDirectory->cd("..");
 
-  gDirectory->mkdir("Number_of_Particles")->cd();
-  dHist_ProtonNumber = new TH1D(
-      "ProtonNumber", ";Number of Protons Candidates in an Event", 10, 0, 10);
-  dHist_PipNumber = new TH1D(
-      "PipNumber", ";Number of #pi^{+} Candidates in an Event", 10, 0, 10);
-  dHist_PimNumber = new TH1D(
-      "PimNumber", ";Number of #pi^{-} Candidates in an Event", 10, 0, 10);
-  dHist_BeamNumber = new TH1D(
-      "BeamNumber", ";Number of Beam Candidates in an Event", 10, 0, 10);
-  gDirectory->cd("..");
+      gDirectory->mkdir("Number_of_Particles")->cd();
+      dHist_ProtonNumber = new TH1D(
+          "ProtonNumber", ";Number of Protons Candidates in an Event", 10, 0, 10);
+      dHist_PipNumber = new TH1D(
+          "PipNumber", ";Number of #pi^{+} Candidates in an Event", 10, 0, 10);
+      dHist_PimNumber = new TH1D(
+          "PimNumber", ";Number of #pi^{-} Candidates in an Event", 10, 0, 10);
+      dHist_BeamNumber = new TH1D(
+          "BeamNumber", ";Number of Beam Candidates in an Event", 10, 0, 10);
+      gDirectory->cd("..");
 
-  dHist_MissingMassSquared =
-      new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}",
+      dHist_MissingMassSquared =
+          new TH1I("MissingMassSquared", ";Missing Mass Squared (GeV/c^{2})^{2}",
                600, -0.06, 0.06);
-  dHist_BeamEnergy =
-      new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
-  dHist_MissingEnergy =
-      new TH1I("MissingEnergy", ";Missing Energy (GeV)", 1000, -1, 3);
-  dHist_RFTiming = new TH1F("RF Timing", ";RF Timing", 90, -5, 5);
+      dHist_BeamEnergy =
+          new TH1I("BeamEnergy", ";Beam Energy (GeV)", 600, 0.0, 12.0);
+      dHist_MissingEnergy =
+          new TH1I("MissingEnergy", ";Missing Energy (GeV)", 1000, -1, 3);
+      dHist_RFTiming = new TH1F("RF Timing", ";RF Timing", 90, -5, 5);
 
-  // OUTPUT BRACHES
-  dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("accidweight");
-  dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("RF_time");
+      // OUTPUT BRACHES
+      dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("accidweight");
+      dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("RF_time");
   /*  dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("beam_p4_meas");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("pim_p4_meas");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("pip_p4_meas");
@@ -125,25 +112,25 @@ void DS_2p_v2::Init(TTree *locTree) {
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("pip_p4_kin");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("p1_p4_kin");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("p2_p4_kin");*/
-  dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
-      "thrownBeam");
-  dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
-      "thrownPiMinus");
-  dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
-      "thrownPiPlus");
-  dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
-      "thrownProton1");
-  dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
-      "thrownProton2");
-  dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
-      "thrownMissing");
+        dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
+          "thrownBeam");
+        dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
+          "thrownPiMinus");
+      dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
+          "thrownPiPlus");
+      dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
+          "thrownProton1");
+      dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
+          "thrownProton2");
+      dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>(
+          "thrownMissing");
 
-  // cerr << "I'm out of the the init! On to process/n";
+      // cerr << "I'm out of the the init! On to process/n";
 }
 
 Bool_t DS_2p_v2::Process(Long64_t locEntry) {
 
-  // cerr << "I'm in process with locEntry value: " << locEntry << "\n";
+      // cerr << "I'm in process with locEntry value: " << locEntry << "\n";
   // CALL THIS FIRST
   DSelector::Process(locEntry); // Gets the data from the tree for the entry
   // cout << "RUN " << Get_RunNumber() << ", EVENT " << Get_EventNumber() <<
@@ -206,12 +193,9 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry) {
 
     // GET COMBO RF TIMING INFO
     TLorentzVector locBeamX4_Measured = dComboBeamWrapper->Get_X4_Measured();
-    Double_t locBunchPeriod =
-        dAnalysisUtilities.Get_BeamBunchPeriod(Get_RunNumber());
-    Double_t locDeltaT_RF = dAnalysisUtilities.Get_DeltaT_RF(
-        Get_RunNumber(), locBeamX4_Measured, dComboWrapper);
-    Int_t locRelBeamBucket = dAnalysisUtilities.Get_RelativeBeamBucket(
-        Get_RunNumber(), locBeamX4_Measured,
+    Double_t locBunchPeriod = dAnalysisUtilities.Get_BeamBunchPeriod(Get_RunNumber());
+    Double_t locDeltaT_RF = dAnalysisUtilities.Get_DeltaT_RF( Get_RunNumber(), locBeamX4_Measured, dComboWrapper);
+    Int_t locRelBeamBucket = dAnalysisUtilities.Get_RelativeBeamBucket( Get_RunNumber(), locBeamX4_Measured,
         dComboWrapper); // 0 for in-time events, non-zero integer for
                         // out-of-time photons
     Int_t locNumOutOfTimeBunchesInTree =
@@ -259,8 +243,7 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry) {
 
     // Loop through the analysis actions, executing them in order for the active
     // particle combo
-    dAnalyzeCutActions
-        ->Perform_Action(); // Must be executed before Execute_Actions()
+    dAnalyzeCutActions ->Perform_Action(); // Must be executed before Execute_Actions()
     if (!Execute_Actions()) // if the active combo fails a cut, IsComboCutFlag
                             // automatically set
       continue;
