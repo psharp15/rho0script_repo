@@ -12,7 +12,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
 
   TFile *fout = new TFile(outfilename, "RECREATE");
   TTree *outputTree =
-      new TTree("filtered_"inputTreename, "filtered_"inputTreename);
+      new TTree(inputTreename, inputTreename);
 
   float kin_chisq;
   UInt_t kin_ndf;
@@ -83,8 +83,8 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   /********************************************** Filling OutputTree
    * **********************************************/
 
-  outputTree->Branch("p4_prot_kin", &p4_prot_lead_kin);
-  outputTree->Branch("x4_prot_kin", &x4_prot_lead_kin);
+  outputTree->Branch("p4_prot_kin", &p4_prot_kin);
+  outputTree->Branch("x4_prot_kin", &x4_prot_kin);
   outputTree->Branch("pip_p4_kin", &p4_pip_kin);
   outputTree->Branch("pim_p4_kin", &p4_pim_kin);
   outputTree->Branch("beam_p4_kin", &p4_beam_kin);
@@ -116,15 +116,9 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   hist_list.push_back(h_CL_cut);
 
   /****** Vert ******/
-  TH1D *h_zprot1vertex = new TH1D(
-      "prot1 Zvertex", "prot1 Zvertex;Vertex z [cm];Counts", 50, 0, 100);
-  hist_list.push_back(h_zprot1vertex);
-  TH1D *h_zprot2vertex = new TH1D(
-      "prot2 Zvertex", "prot2 Zvertex;Vertex z [cm];Counts", 50, 0, 100);
-  hist_list.push_back(h_zprot2vertex);
-  TH1D *h_zprot_vertex = new TH1D(
+  TH1D *h_zprotvertex = new TH1D(
       "prot  Zvertex", "prot Zvertex;Vertex z [cm];Counts", 50, 0, 100);
-  hist_list.push_back(h_zprot_vertex);
+  hist_list.push_back(h_zprotvertex);
   TH2D *h_XYvertex = new TH2D(
       "XYvertex", "XYvertex;Vertex x [cm];Vertex y [cm]", 50, -5, 5, 50, -5, 5);
   hist_list.push_back(h_XYvertex);
@@ -388,13 +382,13 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
      * **********************************************/
 
     const double pleadcutoff = 1;
-
+    //int eventsremoved_pleadcutoff; 
     if( p4_prot_kin->P() < pleadcutoff){
-        int eventsremoved_pleadcutoff =+1;
+        //eventsremoved_pleadcutoff + 1;
         continue;
     }
 
-    cerr << "The proton lead momentum cut removed " << eventsremoved_pleadcutoff << " events" << endl;
+    //cerr << "The proton lead momentum cut removed " << eventsremoved_pleadcutoff << " events" << endl;
 
 
     /********************************************** Fill Uncut Histograms
@@ -414,7 +408,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
     h_pip_from_Beam_uncut->Fill(180. / M_PI * v3_pip.Angle(beam_mom));
     h_pip_prot_from_Beam_uncut->Fill(180. / M_PI * v3_pip.Angle(beam_mom),
                                      180. / M_PI *
-                                         v3_prot_lead.Angle(beam_mom));
+                                         v3_prot_kin.Angle(beam_mom));
     h_coplanarity->Fill(fabs(v3_rho.Phi() - v3_prot_kin.Phi()) * 180 /
                         TMath::Pi());
     h_pip_p_theta_uncut->Fill(180. / M_PI * p4_pip_meas->Theta(), v3_pip.Mag());
@@ -478,6 +472,9 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
 
     h_beamenergy_eb->Fill(p4_beam_kin->E(), weight);
 
+h_prot_p_theta_eb->Fill(180. / M_PI * p4_prot_kin->Theta(),
+                               v3_prot_kin.Mag());
+
     h_prot_p_theta_THROWN_eb->Fill(180. / M_PI * v3_prot_thrown.Theta(),
                                    v3_prot_thrown.Mag());
     h_pip_p_theta_THROWN_eb->Fill(180. / M_PI * v3_pip_thrown.Theta(),
@@ -496,7 +493,6 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   h_CL_uncut->Write();
   h_CL_cut->Write();
   h_zprotvertex->Write();
-  h_zprot_vertex->Write();
   h_XYvertex->Write();
 
   h_beamenergy_uncut_unweighted->Write();
