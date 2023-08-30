@@ -61,7 +61,7 @@ void DS_2p_v2::Init(TTree *locTree) {
       dAnalysisActions.push_back(new DHistogramAction_ParticleComboKinematics(dComboWrapper, true));
 
       // ANALYZE CUT ACTIONS
-      dAnalyzeCutActions = new DHistogramAction_AnalyzeCutActions(dAnalysisActions, dComboWrapper, false, 
+      dAnalyzeCutActions = new DHistogramAction_AnalyzeCutActions(dAnalysisActions, dComboWrapper, false,
                                                                   0, MyRho, 1000, 0, 3, "CutActionEffect");
 
       // INITIALIZE ACTIONS
@@ -144,6 +144,10 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry) {
     dPreviousRunNumber = locRunNumber;
   }
 
+  // GET TRIGGER MASK
+
+	UInt_t dTriggerBits = Get_L1TriggerBits();
+
   // SETUP UNIQUENESS TRACKING
   Reset_Actions_NewEvent();
   dAnalyzeCutActions
@@ -169,6 +173,13 @@ Bool_t DS_2p_v2::Process(Long64_t locEntry) {
     dComboWrapper->Set_ComboIndex(loc_i);
     if (dComboWrapper->Get_IsComboCut()) // check whether the combo has been cut
       continue;                          // combo has been cut previously
+
+      // cut events triggered by pure MinBias (bit 9)
+		// if (dTriggerBits == 256) {
+		//   //cout << dTriggerBits << endl;
+		//   dComboWrapper->Set_IsComboCut(true);
+		//   continue;
+		// }
 
     // GET PARTICLE INDICES
     Int_t locBeamID = dComboBeamWrapper->Get_BeamID();
