@@ -15,6 +15,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
 
   float kin_chisq;
   UInt_t kin_ndf;
+  UInt_t L1TriggerBits;
   ULong64_t event;
   double CL;
   TLorentzVector *p4_prot_meas = 0;
