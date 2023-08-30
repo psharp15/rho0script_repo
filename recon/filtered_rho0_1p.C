@@ -11,7 +11,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   TTree *inputTree = (TTree *)inputFile->Get(inputTreename);
 
   TFile *fout = new TFile(outfilename, "RECREATE");
-  TTree *outputTree = new TTree(inputTreename, inputTremename);
+  TTree *outputTree = new TTree(inputTreename, inputTreename);
 
   float kin_chisq;
   UInt_t kin_ndf;
@@ -28,7 +28,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   TLorentzVector *p4_prot_kin = 0;
   TLorentzVector *p4_pip_kin = 0;
   TLorentzVector *p4_pim_kin = 0;
-  TLorentzVector *x4_prot_lead_kin = 0;
+  TLorentzVector *x4_prot_kin = 0;
   TLorentzVector *x4_pip_kin = 0;
   TLorentzVector *x4_pim_kin = 0;
   TLorentzVector *p4_beam_kin = 0;
@@ -39,7 +39,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   TLorentzVector *p4_beam_thrown = 0;
   TLorentzVector *p4_pip_thrown = 0;
   TLorentzVector *p4_pim_thrown = 0;
-  TLorentzVector *p4_prot_lead_thrown = 0;
+  TLorentzVector *p4_prot_thrown = 0;
   double thrownS;
   double thrownT;
   double thrownU;
