@@ -89,6 +89,7 @@ void DS_1p_v2::Init(TTree *locTree)
 	//OUTPUT BRACHES
 	dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("accidweight");
    	dFlatTreeInterface->Create_Branch_Fundamental<Double_t>("RF_time");
+    dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("L1TriggerBits");
   /*  dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("beam_p4_meas");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("pim_p4_meas");
     dFlatTreeInterface->Create_Branch_NoSplitTObject<TLorentzVector>("pip_p4_meas");
@@ -248,6 +249,7 @@ Bool_t DS_1p_v2::Process(Long64_t locEntry)
 		//FILL ACCIDENTAL WEIGHT
 		dFlatTreeInterface->Fill_Fundamental<Double_t>("accidweight",locHistAccidWeightFactor);
 		dFlatTreeInterface->Fill_Fundamental<Double_t>("RF_time",locDeltaT_RF);
+		dFlatTreeInterface->Fill_Fundamental<UInt_t>("L1TriggerBits",dTriggerBits);
         NumberOfProtons.insert(locProtonTrackID);
 		NumberOfPiPlus.insert(locPiPlusTrackID);
 		NumberOfPiMinus.insert(locPiMinusTrackID);
