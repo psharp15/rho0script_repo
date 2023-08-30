@@ -51,6 +51,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
 
   inputTree->SetBranchAddress("kin_chisq", &kin_chisq);
   inputTree->SetBranchAddress("kin_ndf", &kin_ndf);
+  inputTree->SetBranchAddress("L1TriggerBits", &L1TriggerBits);
   inputTree->SetBranchAddress("pip_p4_meas", &p4_pip_meas);
   inputTree->SetBranchAddress("pim_p4_meas", &p4_pim_meas);
   inputTree->SetBranchAddress("p_p4_meas", &p4_prot_meas);
@@ -90,6 +91,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   outputTree->Branch("beam_p4_kin", &p4_beam_kin);
   outputTree->Branch("accidweight", &weight);
   outputTree->Branch("RF_time", &RF_time);
+  outputTree->Branch("L1TriggerBits", &L1TriggerBits);
   outputTree->Branch("event", &event);
 
   outputTree->Branch("thrownBeam", &p4_beam_thrown);
