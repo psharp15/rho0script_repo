@@ -11,8 +11,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   TTree *inputTree = (TTree *)inputFile->Get(inputTreename);
 
   TFile *fout = new TFile(outfilename, "RECREATE");
-  TTree *outputTree =
-      new TTree(inputTreename, inputTreename);
+  TTree *outputTree = new TTree(inputTreename, inputTremename);
 
   float kin_chisq;
   UInt_t kin_ndf;
@@ -29,7 +28,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   TLorentzVector *p4_prot_kin = 0;
   TLorentzVector *p4_pip_kin = 0;
   TLorentzVector *p4_pim_kin = 0;
-  TLorentzVector *x4_prot_kin = 0;
+  TLorentzVector *x4_prot_lead_kin = 0;
   TLorentzVector *x4_pip_kin = 0;
   TLorentzVector *x4_pim_kin = 0;
   TLorentzVector *p4_beam_kin = 0;
@@ -40,7 +39,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   TLorentzVector *p4_beam_thrown = 0;
   TLorentzVector *p4_pip_thrown = 0;
   TLorentzVector *p4_pim_thrown = 0;
-  TLorentzVector *p4_prot_thrown = 0;
+  TLorentzVector *p4_prot_lead_thrown = 0;
   double thrownS;
   double thrownT;
   double thrownU;
@@ -103,7 +102,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
   TDirectory *dir_UnCut = fout->mkdir("UnCut");
   TDirectory *dir_TCut = fout->mkdir("TCut");
   TDirectory *dir_EnergyBalance = fout->mkdir("Energy Balance");
-  //TDirectory *dir_protmisrecon = fout->mkdir("protmisrecon");
+  // TDirectory *dir_protmisrecon = fout->mkdir("protmisrecon");
 
   /****** Confidence Level ******/
   TH1D *h_CL_uncut =
@@ -370,26 +369,24 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
     TVector3 v3_prot_kin = p4_prot_kin->Vect();
     TVector3 v3_prot_thrown = p4_prot_thrown->Vect();
 
-
     double t_mandel = (*p4_beam_kin - p4_rho0_kin).M2();
     double s_mandel = (*p4_prot_kin + p4_rho0_kin).M2();
 
-    TLorentzVector delta4mom =
-        (*p4_pip_kin + *p4_pim_kin + *p4_prot_kin -
-         TLorentzVector(0, 0, 0, 2 * mN) - *p4_beam_kin);
+    TLorentzVector delta4mom = (*p4_pip_kin + *p4_pim_kin + *p4_prot_kin -
+                                TLorentzVector(0, 0, 0, 2 * mN) - *p4_beam_kin);
 
     /********************************************** Sorting Protons
      * **********************************************/
 
     const double pleadcutoff = 1;
-    //int eventsremoved_pleadcutoff; 
-    if( p4_prot_kin->P() < pleadcutoff){
-        //eventsremoved_pleadcutoff + 1;
-        continue;
+    // int eventsremoved_pleadcutoff;
+    if (p4_prot_kin->P() < pleadcutoff) {
+      // eventsremoved_pleadcutoff + 1;
+      continue;
     }
 
-    //cerr << "The proton lead momentum cut removed " << eventsremoved_pleadcutoff << " events" << endl;
-
+    // cerr << "The proton lead momentum cut removed " <<
+    // eventsremoved_pleadcutoff << " events" << endl;
 
     /********************************************** Fill Uncut Histograms
      * **********************************************/
@@ -407,8 +404,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
     h_prot_from_Beam_uncut->Fill(180. / M_PI * v3_prot_kin.Angle(beam_mom));
     h_pip_from_Beam_uncut->Fill(180. / M_PI * v3_pip.Angle(beam_mom));
     h_pip_prot_from_Beam_uncut->Fill(180. / M_PI * v3_pip.Angle(beam_mom),
-                                     180. / M_PI *
-                                         v3_prot_kin.Angle(beam_mom));
+                                     180. / M_PI * v3_prot_kin.Angle(beam_mom));
     h_coplanarity->Fill(fabs(v3_rho.Phi() - v3_prot_kin.Phi()) * 180 /
                         TMath::Pi());
     h_pip_p_theta_uncut->Fill(180. / M_PI * p4_pip_meas->Theta(), v3_pip.Mag());
@@ -432,7 +428,7 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
 
     /********************************************** T - Cut
      * **********************************************/
-    if (-t_mandel < 1.5)
+    if (-t_mandel < 1)
       continue;
 
     /********************************************** Fill T - Cut Histograms
@@ -472,8 +468,8 @@ void filtered_rho0_1p(const char *inputfilename, const char *inputTreename,
 
     h_beamenergy_eb->Fill(p4_beam_kin->E(), weight);
 
-h_prot_p_theta_eb->Fill(180. / M_PI * p4_prot_kin->Theta(),
-                               v3_prot_kin.Mag());
+    h_prot_p_theta_eb->Fill(180. / M_PI * p4_prot_kin->Theta(),
+                            v3_prot_kin.Mag());
 
     h_prot_p_theta_THROWN_eb->Fill(180. / M_PI * v3_prot_thrown.Theta(),
                                    v3_prot_thrown.Mag());

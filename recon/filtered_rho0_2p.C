@@ -512,7 +512,7 @@ void filtered_rho0_2p(const char *inputfilename, const char *inputTreename,
 
     /********************************************** T - Cut
      * **********************************************/
-    if (-t_mandel < 1.5)
+    if (-t_mandel < 1)
       continue;
 
     /********************************************** Fill T - Cut Histograms
